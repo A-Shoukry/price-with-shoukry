@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Price with Shoukry</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F2;
+    --ink:#1C1B19;
+    --muted:#7A756B;
+    --line:#E4DDD2;
+    --card:#FFFFFF;
+    --clay:#B54834;
+    --clay-light:#F3E1DB;
+    --money:#2F6B4F;
+    --money-light:#E1EEE6;
+    --warn:#9C6B1F;
+    --warn-light:#F5EAD3;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.5;
+    min-height:100vh;
+    padding:32px 20px 80px;
+  }
+  body.rtl{ font-family:'Cairo',sans-serif; direction:rtl; }
+  .wrap{max-width:1120px;margin:0 auto}
+  h1,.serif{font-family:'Fraunces',serif}
+  body.rtl h1, body.rtl .serif{ font-family:'Cairo',sans-serif; }
+  header{margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+  h1{font-size:clamp(26px,4vw,34px);font-weight:600;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:15px;margin-top:6px;max-width:60ch}
+
+  .lang-toggle{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-shrink:0}
+  .lang-toggle button{
+    background:#fff;border:none;padding:8px 16px;font-size:13.5px;font-weight:600;
+    color:var(--muted);cursor:pointer;font-family:inherit;
+  }
+  .lang-toggle button.active{background:var(--clay);color:#fff}
+
+  .layout{display:grid;grid-template-columns:260px 1fr;gap:24px;align-items:start}
+  @media (max-width:820px){.layout{grid-template-columns:1fr}}
+
+  .rail{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .rail-head{padding:16px 16px 10px;border-bottom:1px solid var(--line)}
+  .rail-head .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .cat-list{list-style:none}
+  .cat-item{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:13px 16px;border-bottom:1px solid var(--line);cursor:pointer;
+    transition:background .15s;
+  }
+  .cat-item:last-child{border-bottom:none}
+  .cat-item:hover{background:var(--paper)}
+  .cat-item.active{background:var(--clay-light)}
+  .cat-item .name{font-weight:500;font-size:14.5px}
+  .cat-item .amt{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .cat-item.active .name{color:var(--clay)}
+  .del-btn{
+    background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;
+    padding:2px 6px;border-radius:4px;line-height:1;
+  }
+  .del-btn:hover{background:#00000010;color:var(--clay)}
+  .add-row{padding:12px 16px}
+  .add-input{display:flex;gap:6px}
+  .add-input input{
+    flex:1;font-size:13.5px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;
+    font-family:inherit;background:var(--paper);
+  }
+  .add-input input:focus{outline:none;border-color:var(--clay)}
+  .add-input button{
+    background:var(--clay);color:#fff;border:none;border-radius:6px;
+    padding:0 14px;font-weight:600;font-size:13px;cursor:pointer;
+  }
+  .add-input button:hover{background:#983a29}
+
+  .rail-total{padding:14px 16px;border-top:2px solid var(--ink);background:var(--paper)}
+  .rail-total .name{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .rail-total .val{font-family:'Fraunces',serif;font-size:20px;font-weight:600;margin-top:2px;line-height:1.4}
+  body.rtl .rail-total .val{font-family:'Cairo',sans-serif;}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:26px 28px}
+  .panel-head{margin-bottom:22px}
+  .rename-input{
+    font-family:'Fraunces',serif;font-size:22px;font-weight:600;border:none;background:none;
+    border-bottom:1px dashed var(--line);padding:0 2px;color:var(--ink);max-width:320px;width:100%;
+  }
+  body.rtl .rename-input{font-family:'Cairo',sans-serif;}
+  .rename-input:focus{outline:none;border-color:var(--clay)}
+
+  .field-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:8px}
+  @media (max-width:700px){.field-grid{grid-template-columns:1fr 1fr}}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:12.5px;color:var(--muted);font-weight:500}
+  .field .input-wrap{position:relative}
+  .field .prefix{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px}
+  body.rtl .field .prefix{left:auto;right:10px}
+  .field input, .field select{
+    width:100%;font-size:14.5px;padding:9px 10px 9px 26px;border:1px solid var(--line);
+    border-radius:7px;font-family:inherit;background:var(--paper);color:var(--ink);
+    font-variant-numeric:tabular-nums;
+  }
+  body.rtl .field input, body.rtl .field select{padding:9px 26px 9px 10px;}
+  .field input.no-prefix, .field select{padding-left:10px}
+  body.rtl .field input.no-prefix, body.rtl .field select{padding-right:10px}
+  .field input:focus, .field select:focus{outline:none;border-color:var(--clay);background:#fff}
+
+  .readout{
+    width:100%;font-size:15px;font-weight:600;padding:9px 12px;border:1px solid var(--line);
+    border-radius:7px;background:var(--line);color:var(--ink);
+    font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .readout-accent{color:var(--clay);background:var(--clay-light);border-color:var(--clay)}
+
+  .checkbox-row{display:flex;align-items:center;gap:8px;margin:4px 0 4px}
+  .checkbox-row input{width:16px;height:16px}
+  .checkbox-row label{font-size:13.5px;font-weight:500;color:var(--ink);cursor:pointer}
+
+  .platform-box{background:var(--paper);border-radius:8px;padding:16px 18px;margin-top:6px}
+  .platform-box .lead{font-size:13.5px;color:var(--ink);margin-bottom:10px;line-height:1.6}
+  .platform-pills{display:flex;flex-wrap:wrap;gap:8px}
+  .platform-pill{
+    background:#fff;border:1px solid var(--line);border-radius:20px;
+    padding:6px 14px;font-size:13px;font-weight:500;color:var(--ink);
+    display:flex;align-items:center;gap:6px;
+  }
+  .platform-pill .rank{
+    background:var(--clay);color:#fff;border-radius:50%;width:16px;height:16px;
+    display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;
+  }
+
+  .audience-box{background:var(--money-light);border-radius:8px;padding:16px 18px;margin-top:12px}
+  .audience-box .abox-title{font-size:12.5px;color:#1d4c37;text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-bottom:12px}
+  .audience-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media (max-width:700px){.audience-grid{grid-template-columns:1fr}}
+  .audience-col .ac-label{font-size:11.5px;color:#3d6b52;font-weight:600;margin-bottom:6px}
+  .audience-col .ac-age{font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:#1d4c37}
+  body.rtl .audience-col .ac-age{font-family:'Cairo',sans-serif}
+  .audience-tags{display:flex;flex-wrap:wrap;gap:6px}
+  .audience-tag{background:#fff;border:1px solid #bcdccb;border-radius:20px;padding:4px 11px;font-size:12.5px;color:#1d4c37;font-weight:500}
+  .audience-col .ac-text{font-size:13px;color:#2a5943;line-height:1.5}
+
+  .divider{height:1px;background:var(--line);margin:24px 0}
+  .section-label{font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;font-weight:600}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media (max-width:700px){.stat-grid{grid-template-columns:1fr 1fr}}
+  .stat{background:var(--paper);border-radius:8px;padding:14px 14px}
+  .stat .k{font-size:12px;color:var(--muted);margin-bottom:4px}
+  .stat .v{font-family:'Fraunces',serif;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
+  body.rtl .stat .v{font-family:'Cairo',sans-serif;}
+  .stat.money .v{color:var(--money)}
+  .stat.warn .v{color:var(--warn)}
+  .stat.clay .v{color:var(--clay)}
+
+  .verdict{margin-top:18px;padding:14px 16px;border-radius:8px;display:flex;align-items:center;gap:10px}
+  .verdict.good{background:var(--money-light);color:#1d4c37}
+  .verdict.bad{background:var(--clay-light);color:#8a3423}
+  .verdict .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .verdict.good .dot{background:var(--money)}
+  .verdict.bad .dot{background:var(--clay)}
+  .verdict .txt{font-size:14px;font-weight:500}
+  .verdict .txt b{font-variant-numeric:tabular-nums}
+
+  .empty{padding:60px 20px;text-align:center;color:var(--muted)}
+  .empty .serif{font-size:20px;color:var(--ink);margin-bottom:8px}
+
+  footer{margin-top:28px;text-align:center;color:var(--muted);font-size:12.5px}
+
+  /* ===== Email access gate ===== */
+  #gateOverlay{
+    position:fixed;inset:0;background:var(--paper);z-index:9999;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .gate-card{
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:36px 32px;max-width:400px;width:100%;text-align:center;
+  }
+  .gate-card h2{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin-bottom:10px}
+  body.rtl .gate-card h2{font-family:'Cairo',sans-serif}
+  .gate-card p{color:var(--muted);font-size:14px;margin-bottom:22px;line-height:1.5}
+  .gate-card input{
+    width:100%;font-size:15px;padding:12px 14px;border:1px solid var(--line);
+    border-radius:8px;font-family:inherit;background:var(--paper);margin-bottom:12px;
+    text-align:center;
+  }
+  .gate-card input:focus{outline:none;border-color:var(--clay);background:#fff}
+  .gate-card button{
+    width:100%;background:var(--clay);color:#fff;border:none;border-radius:8px;
+    padding:12px;font-weight:600;font-size:15px;cursor:pointer;font-family:inherit;
+  }
+  .gate-card button:hover{background:#983a29}
+  .gate-error{color:var(--clay);font-size:13px;margin-top:10px;min-height:18px}
+  .gate-contact{margin-top:18px;font-size:12.5px;color:var(--muted)}
+  .gate-contact a{color:var(--clay);text-decoration:none;font-weight:600}
+  #appRoot{display:none}
+</style>
+</head>
+<body>
+
+<!-- ===== EMAIL ACCESS GATE ===== -->
+<div id="gateOverlay">
+  <div class="gate-card">
+    <h2 id="gate_title">Price with Shoukry</h2>
+    <p id="gate_sub">Enter the email you used to get access to this tool.</p>
+    <input type="email" id="gateEmail" placeholder="you@example.com" />
+    <button id="gateBtn">Enter</button>
+    <div class="gate-error" id="gateError"></div>
+    <div class="gate-contact" id="gate_contact">
+      No access yet? <a href="https://wa.me/201111058060" target="_blank">Message me on WhatsApp</a>
+    </div>
+  </div>
+</div>
+
+<div id="appRoot">
+<div class="wrap">
+  <header>
+    <div>
+      <h1 id="t_title">E-commerce budget planner</h1>
+      <p class="sub" id="t_sub">Plan spend by category or market, then check the real numbers behind it — items sold, CPA, ROAS, and net profit.</p>
+    </div>
+    <div class="lang-toggle">
+      <button id="btnEn" class="active">English</button>
+      <button id="btnAr">العربية</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="rail">
+      <div class="rail-head"><span class="label" id="t_railLabel">Categories &amp; markets</span></div>
+      <ul class="cat-list" id="catList"></ul>
+      <div class="add-row">
+        <div class="add-input">
+          <input type="text" id="newCatName" placeholder="e.g. Fashion — Saudi Arabia" />
+          <button id="addCatBtn" id="t_addBtn">Add</button>
+        </div>
+      </div>
+      <div class="rail-total">
+        <div class="name" id="t_totalLabel">Total monthly budget</div>
+        <div class="val" id="grandTotal">$0</div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel"></div>
+  </div>
+
+  <footer id="t_footer">Numbers are estimates based on what you enter — adjust cost, price, and CPA to match your real business.</footer>
+</div>
+</div>
+
+<script>
+// =====================================================================
+// ACCESS CONTROL — add each paying user's email here (lowercase).
+// After adding an email, commit this file to GitHub so it goes live.
+// =====================================================================
+const ALLOWED_EMAILS = [
+  "ahmedsayedshoukry@gmail.com",
+  // "client1@example.com",
+  // "client2@example.com",
+];
+
+function checkGate(){
+  const saved = localStorage.getItem('pws_email');
+  if (saved && ALLOWED_EMAILS.includes(saved.trim().toLowerCase())){
+    document.getElementById('gateOverlay').style.display = 'none';
+    document.getElementById('appRoot').style.display = 'block';
+    return true;
+  }
+  return false;
+}
+
+document.getElementById('gateBtn').addEventListener('click', attemptGate);
+document.getElementById('gateEmail').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') attemptGate();
+});
+function attemptGate(){
+  const input = document.getElementById('gateEmail');
+  const errorEl = document.getElementById('gateError');
+  const email = input.value.trim().toLowerCase();
+  if (!email){ errorEl.textContent = 'Please enter your email.'; return; }
+  if (ALLOWED_EMAILS.includes(email)){
+    localStorage.setItem('pws_email', email);
+    document.getElementById('gateOverlay').style.display = 'none';
+    document.getElementById('appRoot').style.display = 'block';
+    errorEl.textContent = '';
+  } else {
+    errorEl.textContent = "This email doesn't have access yet. Contact me to get access.";
+  }
+}
+
+checkGate();
+</script>
+<script>
+let LANG = 'en';
+
+const T = {
+  en: {
+    title: "Price with Shoukry",
+    sub: "Plan spend by category or market, then check the real numbers behind it — items sold, CPA, ROAS, and net profit.",
+    railLabel: "Categories & markets",
+    addBtn: "Add",
+    addPlaceholder: "e.g. Fashion — Saudi Arabia",
+    totalLabel: "Total monthly budget",
+    footer: "Numbers are estimates based on what you enter — adjust cost, price, and CPA to match your real business.",
+    market: "Market", country: "Country", currency: "Currency", budget: "Monthly ad budget",
+    orderEcon: "Order economics", price: "Selling price / order", cost: "Product cost (COGS)",
+    packaging: "Packaging", shipping: "Shipping (per order)",
+    margin: "Profit margin %", totalCost: "Total cost / order", priceAuto: "Selling price (auto)",
+    adSection: "Ads & costs", cpa: "Cost per acquisition (CPA)", successRate: "Conversion / success rate",
+    salariesCheck: "Include monthly salaries / fixed staff cost",
+    salaries: "Monthly salaries",
+    result: "Result",
+    itemsSold: "Avg. items sold", revenue: "Revenue", roas: "ROAS", adProfit: "Profit after ads",
+    netProfit: "Net profit", opsCostPerOrder: "Ops cost / order", grossMargin: "Gross margin / order",
+    audienceTitle: "Recommended targeting audience", ageGroup: "Age group", interests: "Interests", behaviors: "Behavior",
+    goodTxt: "Profitable — net profit is",
+    badTxt: "Losing money — net profit is",
+    perMonth: "per month.",
+    empty: "No category selected", emptySub: "Add a category or market on the left to start planning.",
+    removeAria: "Remove"
+  },
+  ar: {
+    title: "Price with Shoukry — سعّرها صح",
+    sub: "خطط ميزانيتك حسب الفئة أو السوق، وشوف الأرقام الحقيقية وراها — عدد المبيعات، الـ CPA، الـ ROAS، وصافي الربح.",
+    railLabel: "الفئات والأسواق",
+    addBtn: "إضافة",
+    addPlaceholder: "مثال: أزياء — السعودية",
+    totalLabel: "إجمالي الميزانية الشهرية",
+    footer: "الأرقام تقديرية حسب البيانات اللي بتدخلها — عدّل التكلفة والسعر والـ CPA عشان تناسب بيزنسك الحقيقي.",
+    market: "السوق", country: "الدولة", currency: "العملة", budget: "ميزانية الإعلانات الشهرية",
+    orderEcon: "اقتصاديات الأوردر", price: "سعر البيع / أوردر", cost: "تكلفة المنتج (COGS)",
+    packaging: "التغليف", shipping: "الشحن (لكل أوردر)",
+    margin: "هامش الربح %", totalCost: "إجمالي التكلفة / أوردر", priceAuto: "سعر البيع (تلقائي)",
+    adSection: "الإعلانات والتكاليف", cpa: "تكلفة الاكتساب (CPA)", successRate: "نسبة التحويل / النجاح",
+    salariesCheck: "أضف المرتبات الشهرية / تكلفة الموظفين الثابتة",
+    salaries: "المرتبات الشهرية",
+    result: "النتيجة",
+    itemsSold: "متوسط عدد المبيعات", revenue: "الإيراد", roas: "ROAS", adProfit: "الربح بعد الإعلانات",
+    netProfit: "صافي الربح", opsCostPerOrder: "تكلفة التشغيل / أوردر", grossMargin: "هامش الربح الإجمالي / أوردر",
+    audienceTitle: "الجمهور المستهدف الموصى به", ageGroup: "الفئة العمرية", interests: "الاهتمامات", behaviors: "السلوك",
+    goodTxt: "مربح — صافي الربح",
+    badTxt: "خسارة — صافي الربح",
+    perMonth: "شهريًا.",
+    empty: "مفيش فئة متختارة", emptySub: "ضيف فئة أو سوق من الشمال عشان تبدأ التخطيط.",
+    removeAria: "حذف"
+  }
+};
+
+const COUNTRIES = [
+  { code: "EG", name: { en: "Egypt", ar: "مصر" }, currency: "EGP" },
+  { code: "SA", name: { en: "Saudi Arabia", ar: "السعودية" }, currency: "SAR" },
+  { code: "AE", name: { en: "United Arab Emirates", ar: "الإمارات" }, currency: "AED" },
+  { code: "KW", name: { en: "Kuwait", ar: "الكويت" }, currency: "KWD" },
+  { code: "QA", name: { en: "Qatar", ar: "قطر" }, currency: "QAR" },
+  { code: "BH", name: { en: "Bahrain", ar: "البحرين" }, currency: "BHD" },
+  { code: "OM", name: { en: "Oman", ar: "عُمان" }, currency: "OMR" },
+  { code: "JO", name: { en: "Jordan", ar: "الأردن" }, currency: "JOD" },
+  { code: "LB", name: { en: "Lebanon", ar: "لبنان" }, currency: "USD" },
+  { code: "IQ", name: { en: "Iraq", ar: "العراق" }, currency: "IQD" },
+  { code: "MA", name: { en: "Morocco", ar: "المغرب" }, currency: "MAD" },
+  { code: "TN", name: { en: "Tunisia", ar: "تونس" }, currency: "TND" },
+  { code: "DZ", name: { en: "Algeria", ar: "الجزائر" }, currency: "DZD" },
+  { code: "LY", name: { en: "Libya", ar: "ليبيا" }, currency: "LYD" },
+  { code: "SD", name: { en: "Sudan", ar: "السودان" }, currency: "SDG" },
+  { code: "YE", name: { en: "Yemen", ar: "اليمن" }, currency: "YER" },
+  { code: "PS", name: { en: "Palestine", ar: "فلسطين" }, currency: "USD" },
+  { code: "OTHER", name: { en: "Other / Not listed", ar: "أخرى" }, currency: "USD" }
+];
+
+const CURRENCIES = ["EGP","SAR","AED","USD","KWD","QAR","BHD","OMR","JOD","IQD","MAD","TND","DZD","LYD","SDG","YER","EUR","GBP"];
+const CURRENCY_SYMBOL = {
+  EGP:"E£", SAR:"SAR", AED:"AED", USD:"$", KWD:"KD", QAR:"QAR", BHD:"BD", OMR:"OMR",
+  JOD:"JD", IQD:"IQD", MAD:"MAD", TND:"TND", DZD:"DZD", LYD:"LYD", SDG:"SDG", YER:"YER",
+  EUR:"€", GBP:"£"
+};
+
+const MARKET_PLATFORMS = {
+  EG: { lead: { en:"Egypt's e-commerce is mobile-first and price-sensitive, with heavy COD usage — video-led social platforms convert well, and Google Search captures high-intent shoppers.", ar:"التجارة الإلكترونية في مصر معتمدة على الموبايل وحساسة للسعر، مع استخدام كبير للدفع عند الاستلام — منصات الفيديو بتحوّل كويس، وجوجل بيمسك الجمهور الجاهز للشراء." }, platforms: ["Meta (Facebook/Instagram)", "TikTok", "Google Search", "Snapchat"] },
+  SA: { lead: { en:"Saudi shoppers are high-spending and increasingly mobile-native — Snapchat has outsized reach here, and Google Shopping/Search converts well for considered purchases.", ar:"المتسوق السعودي بينفق بشكل كبير وموبايل-first — سناب شات له انتشار كبير جدًا هناك، وجوجل بيحوّل كويس في المشتريات اللي بتاخد وقت قرار." }, platforms: ["Snapchat", "Meta (Facebook/Instagram)", "TikTok", "Google Ads"] },
+  AE: { lead: { en:"The UAE is a premium, multicultural market with strong purchasing power — Instagram and Google Search lead, with LinkedIn relevant for higher-ticket/B2B-adjacent products.", ar:"الإمارات سوق فاخر ومتعدد الثقافات بقوة شرائية عالية — إنستجرام وجوجل في المقدمة، ولينكدإن مناسب للمنتجات الأعلى سعرًا." }, platforms: ["Meta (Facebook/Instagram)", "Google Ads", "TikTok", "LinkedIn"] },
+  KW: { lead: { en:"Kuwait has one of the highest social media penetration rates in the Gulf — Snapchat and Instagram dominate discovery and conversion.", ar:"الكويت من أعلى دول الخليج في استخدام السوشيال ميديا — سناب شات وإنستجرام مسيطرين على الاكتشاف والتحويل." }, platforms: ["Snapchat", "Meta (Facebook/Instagram)", "TikTok"] },
+  QA: { lead: { en:"Qatar is a small, affluent, highly connected market — Instagram and Google Search are typically the strongest converting channels.", ar:"قطر سوق صغير وغني ومتصل بقوة — إنستجرام وجوجل عادة أقوى قنوات التحويل." }, platforms: ["Meta (Facebook/Instagram)", "Google Ads", "Snapchat"] },
+  BH: { lead: { en:"Bahrain's market closely mirrors Saudi/Gulf shopping habits — Instagram and Snapchat carry most of the social commerce activity.", ar:"سوق البحرين قريب من عادات الشراء الخليجية — إنستجرام وسناب شات بيحملوا معظم نشاط التجارة الاجتماعية." }, platforms: ["Meta (Facebook/Instagram)", "Snapchat", "Google Ads"] },
+  OM: { lead: { en:"Oman is a growing but smaller market — Meta platforms remain the reliable core, with TikTok picking up younger audiences.", ar:"عُمان سوق نامي بس أصغر — منصات ميتا هي الأساس الموثوق، وتيك توك بيكسب الجمهور الأصغر سنًا." }, platforms: ["Meta (Facebook/Instagram)", "TikTok", "Google Ads"] },
+  JO: { lead: { en:"Jordan's digital shoppers are concentrated in Amman and skew younger — Meta and TikTok drive most direct-response e-commerce.", ar:"المتسوقين الرقميين في الأردن متركزين في عمّان وأصغر سنًا — ميتا وتيك توك بيقودوا معظم التجارة المباشرة." }, platforms: ["Meta (Facebook/Instagram)", "TikTok", "Google Search"] },
+  LB: { lead: { en:"Lebanon's e-commerce runs largely on Instagram-driven discovery with WhatsApp closing — expect a social-to-DM funnel more than on-site checkout.", ar:"التجارة الإلكترونية في لبنان معتمدة على الاكتشاف عبر إنستجرام والإغلاق عبر واتساب — قمع من السوشيال للماسنجر أكتر من الشراء المباشر." }, platforms: ["Meta (Facebook/Instagram)", "TikTok", "Google Search"] },
+  IQ: { lead: { en:"Iraq's online shopping is still emerging and mobile-first — Facebook retains strong reach, with TikTok growing fast among younger buyers.", ar:"التسوق الإلكتروني في العراق لسه ناشئ وموبايل-first — فيسبوك له انتشار قوي، وتيك توك بينمو بسرعة بين الشباب." }, platforms: ["Meta (Facebook/Instagram)", "TikTok", "Google Search"] },
+  MA: { lead: { en:"Morocco's market splits between Arabic and French-speaking audiences — Meta platforms lead, and Google Search matters more here than elsewhere in the region.", ar:"سوق المغرب مقسوم بين جمهور عربي وفرنسي — منصات ميتا في المقدمة، وجوجل بيهم هنا أكتر من باقي المنطقة." }, platforms: ["Meta (Facebook/Instagram)", "Google Ads", "TikTok"] },
+  TN: { lead: { en:"Tunisia has a compact, connected online population — Meta platforms dominate both discovery and conversion for e-commerce.", ar:"تونس عندها جمهور رقمي مركّز ومتصل — منصات ميتا مسيطرة على الاكتشاف والتحويل للتجارة الإلكترونية." }, platforms: ["Meta (Facebook/Instagram)", "TikTok", "Google Search"] },
+  DZ: { lead: { en:"Algeria's e-commerce is early-stage relative to the Gulf — Facebook remains the anchor platform, with mobile payments still developing.", ar:"التجارة الإلكترونية في الجزائر لسه في مرحلة مبكرة مقارنة بالخليج — فيسبوك المنصة الأساسية، والدفع عبر الموبايل لسه بيتطور." }, platforms: ["Meta (Facebook/Instagram)", "TikTok"] },
+  LY: { lead: { en:"Libya's online retail is nascent and highly informal — Facebook groups/marketplace and direct messaging drive most transactions.", ar:"التجارة الإلكترونية في ليبيا ناشئة وغير رسمية جدًا — جروبات فيسبوك والماسنجر المباشر بيقودوا معظم التعاملات." }, platforms: ["Meta (Facebook/Instagram)"] },
+  SD: { lead: { en:"Sudan's digital commerce is early and constrained by connectivity — Facebook is by far the dominant platform for reaching shoppers.", ar:"التجارة الرقمية في السودان مبكرة ومحدودة بسبب الاتصال بالإنترنت — فيسبوك المنصة المسيطرة بشكل كبير." }, platforms: ["Meta (Facebook/Instagram)"] },
+  YE: { lead: { en:"Yemen's e-commerce infrastructure is limited — Facebook and WhatsApp-driven sales are the practical starting point.", ar:"البنية التحتية للتجارة الإلكترونية في اليمن محدودة — البيع عبر فيسبوك وواتساب هو نقطة البداية العملية." }, platforms: ["Meta (Facebook/Instagram)"] },
+  PS: { lead: { en:"Palestine's online shoppers are highly social-media engaged despite infrastructure challenges — Instagram and Facebook lead discovery.", ar:"المتسوقين في فلسطين نشطين جدًا على السوشيال ميديا رغم تحديات البنية التحتية — إنستجرام وفيسبوك في مقدمة الاكتشاف." }, platforms: ["Meta (Facebook/Instagram)", "TikTok"] },
+  OTHER: { lead: { en:"Pick platforms based on where your audience actually spends time — Meta is the safest broad-reach default almost anywhere in the region.", ar:"اختار المنصات حسب مكان تواجد جمهورك فعليًا — ميتا هي الخيار الآمن الأوسع انتشارًا في معظم المنطقة." }, platforms: ["Meta (Facebook/Instagram)", "Google Ads", "TikTok"] }
+};
+
+const MARKET_AUDIENCE = {
+  EG: { age: "22–38", interests: { en:["Online shopping","Fashion & beauty","Mobile payments","Influencer content"], ar:["التسوق الإلكتروني","الموضة والجمال","الدفع عبر الموبايل","محتوى المؤثرين"] }, behavior: { en:"Mobile-first shoppers, price-comparing before purchase, high trust in COD.", ar:"متسوقين عبر الموبايل بشكل أساسي، بيقارنوا الأسعار قبل الشراء، وثقة عالية في الدفع عند الاستلام." } },
+  SA: { age: "24–40", interests: { en:["Luxury goods","Fashion","Fitness & wellness","Fast delivery"], ar:["السلع الفاخرة","الموضة","اللياقة والصحة","التوصيل السريع"] }, behavior: { en:"High spending power, values brand and quality, responsive to Snapchat/Instagram stories.", ar:"قوة شرائية عالية، بيهتموا بالبراند والجودة، وبيتفاعلوا كويس مع قصص سناب شات وإنستجرام." } },
+  AE: { age: "25–42", interests: { en:["Premium brands","Travel","Tech & gadgets","Home & lifestyle"], ar:["البراندات الفاخرة","السفر","التكنولوجيا","المنزل ونمط الحياة"] }, behavior: { en:"Multicultural, higher AOV expectations, strong response to premium visuals and fast delivery.", ar:"جمهور متعدد الثقافات، متوقعين قيمة أوردر أعلى، وبيتفاعلوا كويس مع الصور الفاخرة والتوصيل السريع." } },
+  KW: { age: "22–38", interests: { en:["Fashion","Beauty","Snapchat content","Local delivery apps"], ar:["الموضة","الجمال","محتوى سناب شات","تطبيقات التوصيل المحلية"] }, behavior: { en:"Very high social media usage, quick purchase decisions driven by Snapchat/Instagram ads.", ar:"استخدام عالي جدًا للسوشيال ميديا، وقرارات شراء سريعة مدفوعة بإعلانات سناب وإنستجرام." } },
+  QA: { age: "25–40", interests: { en:["Premium retail","Family products","Travel","Home goods"], ar:["التجزئة الفاخرة","منتجات العائلة","السفر","الأدوات المنزلية"] }, behavior: { en:"Affluent, family-oriented purchasing, prefers trusted brands over new/unknown ones.", ar:"جمهور غني وقراراته الشرائية عائلية، بيفضّل البراندات الموثوقة عن الجديدة." } },
+  BH: { age: "23–39", interests: { en:["Fashion","Beauty","Food delivery","Social shopping"], ar:["الموضة","الجمال","توصيل الطعام","التسوق عبر السوشيال"] }, behavior: { en:"Similar to Saudi/Gulf patterns — social-driven discovery, mobile checkout preferred.", ar:"مشابه لأنماط الخليج — اكتشاف عبر السوشيال ميديا، ويفضّل الدفع عبر الموبايل." } },
+  OM: { age: "22–36", interests: { en:["Fashion","Mobile accessories","Local brands","TikTok trends"], ar:["الموضة","إكسسوارات الموبايل","البراندات المحلية","ترندات تيك توك"] }, behavior: { en:"Growing younger audience on TikTok, more price-sensitive than other Gulf markets.", ar:"جمهور شاب متنامي على تيك توك، وحساس للسعر أكتر من باقي أسواق الخليج." } },
+  JO: { age: "20–34", interests: { en:["Fashion","Student products","Budget deals","TikTok content"], ar:["الموضة","منتجات الطلبة","العروض الاقتصادية","محتوى تيك توك"] }, behavior: { en:"Younger, budget-conscious, concentrated in Amman, highly active on TikTok and Instagram.", ar:"جمهور أصغر سنًا وحساس للميزانية، متركز في عمّان، ونشط جدًا على تيك توك وإنستجرام." } },
+  LB: { age: "22–38", interests: { en:["Fashion","Beauty","Small business goods","Instagram shops"], ar:["الموضة","الجمال","منتجات المشاريع الصغيرة","متاجر إنستجرام"] }, behavior: { en:"Instagram-led discovery, closes via WhatsApp/DM more than on-site checkout.", ar:"اكتشاف بيبدأ من إنستجرام، والإغلاق بيتم عبر واتساب أو الماسنجر أكتر من الشراء المباشر." } },
+  IQ: { age: "20–35", interests: { en:["Fashion","Mobile phones","Home goods","Facebook groups"], ar:["الموضة","الموبايلات","الأدوات المنزلية","جروبات فيسبوك"] }, behavior: { en:"Facebook remains primary discovery channel; cash-on-delivery strongly preferred.", ar:"فيسبوك لسه القناة الأساسية للاكتشاف، والدفع عند الاستلام مفضّل بقوة." } },
+  MA: { age: "22–37", interests: { en:["Fashion","Beauty","Home products","Bilingual content (AR/FR)"], ar:["الموضة","الجمال","منتجات المنزل","محتوى ثنائي اللغة (عربي/فرنسي)"] }, behavior: { en:"Split between Arabic and French-speaking segments; Google Search plays a bigger role.", ar:"منقسم بين جمهور عربي وفرنسي؛ وجوجل بيلعب دور أكبر هنا." } },
+  TN: { age: "22–36", interests: { en:["Fashion","Beauty","Local marketplaces","Facebook groups"], ar:["الموضة","الجمال","الأسواق المحلية","جروبات فيسبوك"] }, behavior: { en:"Compact, connected audience with strong reliance on Meta platforms for discovery.", ar:"جمهور مركّز ومتصل بيعتمد بشكل كبير على منصات ميتا للاكتشاف." } },
+  DZ: { age: "20–35", interests: { en:["Fashion","Electronics","Facebook marketplace","Value deals"], ar:["الموضة","الإلكترونيات","سوق فيسبوك","العروض الاقتصادية"] }, behavior: { en:"Facebook-anchored, cautious about online payment, cash-on-delivery dominant.", ar:"معتمد بشكل أساسي على فيسبوك، وحذر من الدفع الإلكتروني، والدفع عند الاستلام هو السائد." } },
+  LY: { age: "20–36", interests: { en:["Fashion","Household goods","Facebook groups","Informal marketplaces"], ar:["الموضة","الأدوات المنزلية","جروبات فيسبوك","أسواق غير رسمية"] }, behavior: { en:"Highly informal buying via Facebook groups and direct messaging.", ar:"شراء غير رسمي جدًا عبر جروبات فيسبوك والماسنجر المباشر." } },
+  SD: { age: "20–35", interests: { en:["Household goods","Fashion","Facebook content"], ar:["الأدوات المنزلية","الموضة","محتوى فيسبوك"] }, behavior: { en:"Limited connectivity shapes buying; Facebook is the dominant discovery and sales channel.", ar:"محدودية الاتصال بتأثر على الشراء؛ وفيسبوك هي قناة الاكتشاف والبيع المسيطرة." } },
+  YE: { age: "20–35", interests: { en:["Household goods","Mobile phones","Facebook/WhatsApp commerce"], ar:["الأدوات المنزلية","الموبايلات","تجارة فيسبوك وواتساب"] }, behavior: { en:"Sales driven through Facebook and WhatsApp due to limited e-commerce infrastructure.", ar:"البيع بيتم عبر فيسبوك وواتساب بسبب محدودية بنية التجارة الإلكترونية." } },
+  PS: { age: "20–36", interests: { en:["Fashion","Local products","Instagram content","Community support"], ar:["الموضة","المنتجات المحلية","محتوى إنستجرام","دعم المجتمع"] }, behavior: { en:"Highly social-media engaged; community and local-support messaging performs well.", ar:"جمهور نشط جدًا على السوشيال ميديا؛ ورسائل الدعم المجتمعي والمحلي بتأدي كويس." } },
+  OTHER: { age: "22–38", interests: { en:["General shopping","Mobile-first content","Value deals"], ar:["التسوق العام","محتوى موبايل-first","العروض الاقتصادية"] }, behavior: { en:"Start broad and refine targeting once you have real conversion data from the account.", ar:"ابدأ بجمهور واسع وضيّقه بعدين بناءً على بيانات التحويل الحقيقية من الحساب." } }
+};
+
+let categories = [
+  { id: 1, name: "Fashion — Egypt", country: "EG", currency: "EGP", budget: 15000, margin: 100, cost: 350, packaging: 15, shipping: 45, cpa: 130, successRate: 90, useSalaries: false, salaries: 0 },
+  { id: 2, name: "Beauty — Saudi Arabia", country: "SA", currency: "SAR", budget: 22000, margin: 90, cost: 60, packaging: 8, shipping: 20, cpa: 35, successRate: 92, useSalaries: true, salaries: 4000 },
+  { id: 3, name: "Home Goods — UAE", country: "AE", currency: "AED", budget: 9000, margin: 75, cost: 140, packaging: 12, shipping: 30, cpa: 70, successRate: 88, useSalaries: false, salaries: 0 }
+];
+let activeId = categories[0].id;
+let nextId = 4;
+
+function tr(key){ return T[LANG][key] || key; }
+
+function fmt(n, currency){
+  n = Math.round(n * 100) / 100;
+  const sym = CURRENCY_SYMBOL[currency] || "$";
+  return sym + " " + n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+}
+function fmtInt(n, currency){
+  const sym = CURRENCY_SYMBOL[currency] || "$";
+  return sym + " " + Math.round(n).toLocaleString();
+}
+function escapeHtml(s){
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+
+function applyStaticText(){
+  document.getElementById('t_title').textContent = tr('title');
+  document.getElementById('t_sub').textContent = tr('sub');
+  document.getElementById('t_railLabel').textContent = tr('railLabel');
+  document.getElementById('addCatBtn').textContent = tr('addBtn');
+  document.getElementById('newCatName').placeholder = tr('addPlaceholder');
+  document.getElementById('t_totalLabel').textContent = tr('totalLabel');
+  document.getElementById('t_footer').textContent = tr('footer');
+  document.body.classList.toggle('rtl', LANG === 'ar');
+  document.documentElement.setAttribute('dir', LANG === 'ar' ? 'rtl' : 'ltr');
+}
+
+function renderList(){
+  const list = document.getElementById('catList');
+  list.innerHTML = '';
+  categories.forEach(cat => {
+    const li = document.createElement('li');
+    li.className = 'cat-item' + (cat.id === activeId ? ' active' : '');
+    li.innerHTML = `
+      <div>
+        <div class="name">${escapeHtml(cat.name)}</div>
+        <div class="amt">${fmtInt(cat.budget, cat.currency)}</div>
+      </div>
+      <button class="del-btn" data-id="${cat.id}" aria-label="${tr('removeAria')} ${escapeHtml(cat.name)}">&times;</button>
+    `;
+    li.addEventListener('click', (e) => {
+      if (e.target.classList.contains('del-btn')) return;
+      activeId = cat.id;
+      renderList();
+      renderPanel();
+    });
+    list.appendChild(li);
+  });
+  list.querySelectorAll('.del-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = Number(btn.dataset.id);
+      categories = categories.filter(c => c.id !== id);
+      if (activeId === id && categories.length){ activeId = categories[0].id; }
+      renderList();
+      renderPanel();
+      renderGrandTotal();
+    });
+  });
+}
+
+function renderGrandTotal(){
+  const byCurrency = {};
+  categories.forEach(c => {
+    const cur = c.currency || "USD";
+    byCurrency[cur] = (byCurrency[cur] || 0) + (Number(c.budget) || 0);
+  });
+  const parts = Object.keys(byCurrency).map(cur => fmtInt(byCurrency[cur], cur));
+  document.getElementById('grandTotal').innerHTML = parts.length ? parts.join('<br>') : fmtInt(0, "USD");
+}
+
+function computeStats(cat){
+  const opsCost = (Number(cat.cost)||0) + (Number(cat.packaging)||0) + (Number(cat.shipping)||0);
+  const marginPct = Number(cat.margin) || 0;
+  const price = opsCost * (1 + marginPct / 100);
+  const grossMargin = price - opsCost;
+  const budget = Number(cat.budget) || 0;
+  const cpa = Number(cat.cpa) || 0;
+  const successRate = Math.min(100, Math.max(0, Number(cat.successRate)||0)) / 100;
+  const salaries = cat.useSalaries ? (Number(cat.salaries)||0) : 0;
+
+  const itemsSold = cpa > 0 ? (budget / cpa) * successRate : 0;
+  const revenue = itemsSold * price;
+  const roas = budget > 0 ? revenue / budget : 0;
+  const totalOpsCost = itemsSold * opsCost;
+  const adProfit = revenue - totalOpsCost - budget;
+  const netProfit = adProfit - salaries;
+
+  return { opsCost, price, grossMargin, itemsSold, revenue, roas, adProfit, netProfit };
+}
+
+function renderPanel(){
+  const panel = document.getElementById('panel');
+  const cat = categories.find(c => c.id === activeId);
+  if (!cat){
+    panel.innerHTML = `<div class="empty"><div class="serif">${tr('empty')}</div><p>${tr('emptySub')}</p></div>`;
+    return;
+  }
+  const s = computeStats(cat);
+  const profitable = s.netProfit > 0;
+  const market = MARKET_PLATFORMS[cat.country] || MARKET_PLATFORMS.OTHER;
+  const audience = MARKET_AUDIENCE[cat.country] || MARKET_AUDIENCE.OTHER;
+  const cur = cat.currency || "USD";
+
+  const countryOptions = COUNTRIES.map(c =>
+    `<option value="${c.code}" ${c.code === cat.country ? 'selected' : ''}>${c.name[LANG] || c.name.en}</option>`
+  ).join('');
+  const currencyOptions = CURRENCIES.map(c =>
+    `<option value="${c}" ${c === cat.currency ? 'selected' : ''}>${c}</option>`
+  ).join('');
+
+  panel.innerHTML = `
+    <div class="panel-head">
+      <input class="rename-input" id="nameInput" value="${escapeHtml(cat.name)}" />
+    </div>
+
+    <div class="section-label">${tr('market')}</div>
+    <div class="field-grid">
+      <div class="field">
+        <label>${tr('country')}</label>
+        <select id="f_country">${countryOptions}</select>
+      </div>
+      <div class="field">
+        <label>${tr('currency')}</label>
+        <select id="f_currency">${currencyOptions}</select>
+      </div>
+      <div class="field">
+        <label>${tr('budget')}</label>
+        <div class="input-wrap"><span class="prefix">${CURRENCY_SYMBOL[cur] || '$'}</span>
+          <input type="text" inputmode="decimal" id="f_budget" value="${cat.budget}" />
+        </div>
+      </div>
+    </div>
+
+    <div class="platform-box">
+      <div class="lead">${market.lead[LANG] || market.lead.en}</div>
+      <div class="platform-pills">
+        ${market.platforms.map((p,i) => `<span class="platform-pill"><span class="rank">${i+1}</span>${p}</span>`).join('')}
+      </div>
+    </div>
+
+    <div class="audience-box">
+      <div class="abox-title">${tr('audienceTitle')}</div>
+      <div class="audience-grid">
+        <div class="audience-col">
+          <div class="ac-label">${tr('ageGroup')}</div>
+          <div class="ac-age">${audience.age}</div>
+        </div>
+        <div class="audience-col">
+          <div class="ac-label">${tr('interests')}</div>
+          <div class="audience-tags">
+            ${(audience.interests[LANG] || audience.interests.en).map(i => `<span class="audience-tag">${i}</span>`).join('')}
+          </div>
+        </div>
+        <div class="audience-col">
+          <div class="ac-label">${tr('behaviors')}</div>
+          <div class="ac-text">${audience.behavior[LANG] || audience.behavior.en}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-label">${tr('orderEcon')}</div>
+    <div class="field-grid">
+      <div class="field">
+        <label>${tr('cost')}</label>
+        <div class="input-wrap"><span class="prefix">${CURRENCY_SYMBOL[cur] || '$'}</span>
+          <input type="text" inputmode="decimal" id="f_cost" value="${cat.cost}" />
+        </div>
+      </div>
+      <div class="field">
+        <label>${tr('packaging')}</label>
+        <div class="input-wrap"><span class="prefix">${CURRENCY_SYMBOL[cur] || '$'}</span>
+          <input type="text" inputmode="decimal" id="f_packaging" value="${cat.packaging}" />
+        </div>
+      </div>
+      <div class="field">
+        <label>${tr('shipping')}</label>
+        <div class="input-wrap"><span class="prefix">${CURRENCY_SYMBOL[cur] || '$'}</span>
+          <input type="text" inputmode="decimal" id="f_shipping" value="${cat.shipping}" />
+        </div>
+      </div>
+      <div class="field">
+        <label>${tr('totalCost')}</label>
+        <div class="readout" id="out_totalcost"></div>
+      </div>
+      <div class="field">
+        <label>${tr('margin')}</label>
+        <div class="input-wrap">
+          <input type="text" inputmode="decimal" id="f_margin" value="${cat.margin}" class="no-prefix" />
+          <span class="prefix" style="left:auto;right:10px">%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>${tr('priceAuto')}</label>
+        <div class="readout readout-accent" id="out_price"></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-label">${tr('adSection')}</div>
+    <div class="field-grid">
+      <div class="field">
+        <label>${tr('cpa')}</label>
+        <div class="input-wrap"><span class="prefix">${CURRENCY_SYMBOL[cur] || '$'}</span>
+          <input type="text" inputmode="decimal" id="f_cpa" value="${cat.cpa}" />
+        </div>
+      </div>
+      <div class="field">
+        <label>${tr('successRate')}</label>
+        <div class="input-wrap">
+          <input type="text" inputmode="decimal" id="f_successRate" value="${cat.successRate}" class="no-prefix" />
+          <span class="prefix" style="left:auto;right:10px">%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="checkbox-row">
+      <input type="checkbox" id="f_useSalaries" ${cat.useSalaries ? 'checked' : ''} />
+      <label for="f_useSalaries">${tr('salariesCheck')}</label>
+    </div>
+    ${cat.useSalaries ? `
+    <div class="field-grid">
+      <div class="field">
+        <label>${tr('salaries')}</label>
+        <div class="input-wrap"><span class="prefix">${CURRENCY_SYMBOL[cur] || '$'}</span>
+          <input type="text" inputmode="decimal" id="f_salaries" value="${cat.salaries}" />
+        </div>
+      </div>
+    </div>` : ''}
+
+    <div class="divider"></div>
+
+    <div class="section-label">${tr('result')}</div>
+    <div class="stat-grid">
+      <div class="stat">
+        <div class="k">${tr('itemsSold')}</div>
+        <div class="v" id="out_items"></div>
+      </div>
+      <div class="stat">
+        <div class="k">${tr('revenue')}</div>
+        <div class="v" id="out_revenue"></div>
+      </div>
+      <div class="stat clay">
+        <div class="k">${tr('roas')}</div>
+        <div class="v" id="out_roas"></div>
+      </div>
+      <div class="stat warn">
+        <div class="k">${tr('adProfit')}</div>
+        <div class="v" id="out_adprofit"></div>
+      </div>
+    </div>
+
+    <div class="stat-grid" style="margin-top:12px">
+      <div class="stat">
+        <div class="k">${tr('opsCostPerOrder')}</div>
+        <div class="v" id="out_ops"></div>
+      </div>
+      <div class="stat">
+        <div class="k">${tr('grossMargin')}</div>
+        <div class="v" id="out_margin"></div>
+      </div>
+      <div class="stat money" style="grid-column: span 2">
+        <div class="k">${tr('netProfit')}</div>
+        <div class="v" id="out_net"></div>
+      </div>
+    </div>
+
+    <div class="verdict" id="verdictBox">
+      <span class="dot"></span>
+      <span class="txt" id="verdictText"></span>
+    </div>
+  `;
+
+  updateOutputs();
+
+  document.getElementById('f_country').addEventListener('change', (e) => {
+    cat.country = e.target.value;
+    const found = COUNTRIES.find(c => c.code === cat.country);
+    if (found) cat.currency = found.currency;
+    renderPanel();
+    renderList();
+    renderGrandTotal();
+  });
+  document.getElementById('f_currency').addEventListener('change', (e) => {
+    cat.currency = e.target.value;
+    renderPanel();
+    renderList();
+    renderGrandTotal();
+  });
+  document.getElementById('f_useSalaries').addEventListener('change', (e) => {
+    cat.useSalaries = e.target.checked;
+    renderPanel();
+  });
+
+  const bindNum = (id, key, refreshList) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', (e) => {
+      const raw = e.target.value.replace(/,/g, '');
+      cat[key] = raw === '' ? 0 : Number(raw);
+      updateOutputs();
+      if (refreshList){ renderListInPlace(); renderGrandTotal(); }
+    });
+  };
+  bindNum('f_budget','budget', true);
+  bindNum('f_cost','cost');
+  bindNum('f_packaging','packaging');
+  bindNum('f_shipping','shipping');
+  bindNum('f_margin','margin');
+  bindNum('f_cpa','cpa');
+  bindNum('f_successRate','successRate');
+  bindNum('f_salaries','salaries');
+
+  document.getElementById('nameInput').addEventListener('input', (e) => {
+    cat.name = e.target.value;
+    renderListInPlace();
+  });
+}
+
+function updateOutputs(){
+  const cat = categories.find(c => c.id === activeId);
+  if (!cat) return;
+  const s = computeStats(cat);
+  const cur = cat.currency || "USD";
+  const profitable = s.netProfit > 0;
+
+  document.getElementById('out_items').textContent = Math.round(s.itemsSold).toLocaleString();
+  document.getElementById('out_revenue').textContent = fmt(s.revenue, cur);
+  document.getElementById('out_roas').textContent = s.roas ? s.roas.toFixed(2) + 'x' : '—';
+  document.getElementById('out_adprofit').textContent = fmt(s.adProfit, cur);
+  document.getElementById('out_ops').textContent = fmt(s.opsCost, cur);
+  document.getElementById('out_margin').textContent = fmt(s.grossMargin, cur);
+  document.getElementById('out_net').textContent = fmt(s.netProfit, cur);
+  const totalCostEl = document.getElementById('out_totalcost');
+  const priceEl = document.getElementById('out_price');
+  if (totalCostEl) totalCostEl.textContent = fmt(s.opsCost, cur);
+  if (priceEl) priceEl.textContent = fmt(s.price, cur);
+
+  const verdictBox = document.getElementById('verdictBox');
+  const verdictText = document.getElementById('verdictText');
+  verdictBox.className = 'verdict ' + (profitable ? 'good' : 'bad');
+  verdictText.innerHTML = `${profitable ? tr('goodTxt') : tr('badTxt')} <b>${fmt(s.netProfit, cur)}</b> ${tr('perMonth')}`;
+}
+
+function renderListInPlace(){
+  const cat = categories.find(c => c.id === activeId);
+  const item = document.querySelector(`.cat-item.active`);
+  if (item && cat){
+    item.querySelector('.name').textContent = cat.name;
+    item.querySelector('.amt').textContent = fmtInt(cat.budget, cat.currency);
+  }
+}
+
+document.getElementById('addCatBtn').addEventListener('click', addCategory);
+document.getElementById('newCatName').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') addCategory();
+});
+function addCategory(){
+  const input = document.getElementById('newCatName');
+  const name = input.value.trim();
+  if (!name) return;
+  const newCat = { id: nextId++, name, country: "EG", currency: "EGP", budget: 5000, margin: 80, cost: 200, packaging: 10, shipping: 30, cpa: 60, successRate: 85, useSalaries: false, salaries: 0 };
+  categories.push(newCat);
+  activeId = newCat.id;
+  input.value = '';
+  renderList();
+  renderPanel();
+  renderGrandTotal();
+}
+
+document.getElementById('btnEn').addEventListener('click', () => {
+  LANG = 'en';
+  document.getElementById('btnEn').classList.add('active');
+  document.getElementById('btnAr').classList.remove('active');
+  applyStaticText();
+  renderList();
+  renderPanel();
+  renderGrandTotal();
+});
+document.getElementById('btnAr').addEventListener('click', () => {
+  LANG = 'ar';
+  document.getElementById('btnAr').classList.add('active');
+  document.getElementById('btnEn').classList.remove('active');
+  applyStaticText();
+  renderList();
+  renderPanel();
+  renderGrandTotal();
+});
+
+applyStaticText();
+renderList();
+renderPanel();
+renderGrandTotal();
+</script>
+</body>
+</html>
