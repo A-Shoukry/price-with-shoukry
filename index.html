@@ -198,6 +198,20 @@
   .gate-error{color:var(--clay);font-size:13px;margin-top:10px;min-height:18px}
   .gate-contact{margin-top:18px;font-size:12.5px;color:var(--muted)}
   .gate-contact a{color:var(--clay);text-decoration:none;font-weight:600}
+
+  .sub-divider{display:flex;align-items:center;gap:10px;margin:22px 0 16px;color:var(--muted);font-size:12px}
+  .sub-divider::before,.sub-divider::after{content:"";flex:1;height:1px;background:var(--line)}
+  .pay-options{display:flex;flex-direction:column;gap:10px}
+  .pay-btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    width:100%;padding:12px;border-radius:8px;font-weight:600;font-size:14px;
+    text-decoration:none;cursor:pointer;border:1px solid var(--line);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .pay-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+  .pay-btn.instapay{background:#00A651;color:#fff;border-color:#00A651}
+  .pay-btn.paypal{background:#0070BA;color:#fff;border-color:#0070BA}
+  .pay-note{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5}
   #appRoot{display:none}
 </style>
 </head>
@@ -211,8 +225,16 @@
     <input type="email" id="gateEmail" placeholder="you@example.com" />
     <button id="gateBtn">Enter</button>
     <div class="gate-error" id="gateError"></div>
+
+    <div class="sub-divider" id="sub_divider">Don't have access yet?</div>
+    <div class="pay-options">
+      <a class="pay-btn instapay" id="pay_instapay" href="https://ipn.eg/S/ahmedshoukry1991/instapay/0l8hm6" target="_blank" rel="noopener">Subscribe Now — InstaPay (500 EGP)</a>
+      <a class="pay-btn paypal" id="pay_paypal" href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=matt@paraguru.net&amount=10&currency_code=USD&item_name=Price+with+Shoukry+Subscription" target="_blank" rel="noopener">Subscribe Now — PayPal ($10)</a>
+    </div>
+    <div class="pay-note" id="pay_note">After paying, send your email via WhatsApp so I can add you — access isn't automatic.</div>
+
     <div class="gate-contact" id="gate_contact">
-      No access yet? <a href="https://wa.me/201111058060" target="_blank">Message me on WhatsApp</a>
+      Already paid? <a href="https://wa.me/201111058060" target="_blank">Message me on WhatsApp</a>
     </div>
   </div>
 </div>
