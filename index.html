@@ -134,17 +134,16 @@
   .checkbox-row label{font-size:13.5px;font-weight:500;color:var(--ink);cursor:pointer}
 
   .platform-box{background:var(--paper);border-radius:8px;padding:16px 18px;margin-top:6px}
-  .platform-box .lead{font-size:13.5px;color:var(--ink);margin-bottom:10px;line-height:1.6}
-  .platform-pills{display:flex;flex-wrap:wrap;gap:8px}
-  .platform-pill{
-    background:#fff;border:1px solid var(--line);border-radius:20px;
-    padding:6px 14px;font-size:13px;font-weight:500;color:var(--ink);
-    display:flex;align-items:center;gap:6px;
-  }
-  .platform-pill .rank{
-    background:var(--clay);color:#fff;border-radius:50%;width:16px;height:16px;
-    display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;
-  }
+  .mix-list{display:flex;flex-direction:column;gap:10px}
+  .mix-row{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+  .mix-row-off{opacity:.6;border-style:dashed}
+  .mix-row-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+  .mix-name{font-weight:700;font-size:13.5px;color:var(--ink)}
+  .mix-pct{font-weight:800;font-size:14px;color:var(--clay)}
+  .mix-row-off .mix-pct{color:var(--muted);font-size:11px;font-weight:600}
+  .mix-reason{font-size:11.5px;color:var(--muted);line-height:1.4}
+  .mix-note{font-size:12.5px;color:var(--ink);line-height:1.6;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+  .mix-disclaimer{font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:8px;font-style:italic}
 
   .audience-box{background:var(--money-light);border-radius:8px;padding:16px 18px;margin-top:12px}
   .audience-box .abox-title{font-size:12.5px;color:#1d4c37;text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-bottom:12px}
@@ -545,6 +544,7 @@ const T = {
     analysisTitle: "Market & Category Analysis",
     analysisSub: "A quick read on your market + category, with rough estimated CPA ranges and order counts to sanity-check your plan against.",
     analysisDisclaimer: "These CPA ranges are rough starting estimates based on general category/market patterns — not measured benchmarks. Always replace with your own real account data once you have it.",
+    mixDisclaimer: "Platform mix based on estimated audience reach and ad-platform data by country — not live account performance. Test and adjust based on your own results.",
     analysisEstOrders: "Est. orders at this CPA",
     analysisCpaRange: "Avg. CPA"
   },
@@ -580,6 +580,7 @@ const T = {
     analysisTitle: "تحليل السوق والفئة",
     analysisSub: "نظرة سريعة على سوقك وفئة نشاطك، مع نطاقات تقديرية تقريبية للـ CPA وعدد الأوردرات المتوقع عشان تراجع خطتك عليها.",
     analysisDisclaimer: "نطاقات الـ CPA دي تقديرات تقريبية بناءً على أنماط عامة للفئة والسوق — مش أرقام مقاسة فعليًا. استبدلها ببيانات حسابك الحقيقية أول ما تكون متاحة.",
+    mixDisclaimer: "توزيع المنصات مبني على تقديرات انتشار الجمهور وبيانات منصات الإعلانات لكل دولة — مش أداء حساب حقيقي لحظي. اختبر وعدّل بناءً على نتائجك الفعلية.",
     analysisEstOrders: "عدد الأوردرات المتوقع بالـ CPA ده",
     analysisCpaRange: "متوسط الـ CPA"
   }
@@ -603,6 +604,11 @@ const COUNTRIES = [
   { code: "SD", name: { en: "Sudan", ar: "السودان" }, currency: "SDG" },
   { code: "YE", name: { en: "Yemen", ar: "اليمن" }, currency: "YER" },
   { code: "PS", name: { en: "Palestine", ar: "فلسطين" }, currency: "USD" },
+  { code: "MR", name: { en: "Mauritania", ar: "موريتانيا" }, currency: "USD" },
+  { code: "SO", name: { en: "Somalia", ar: "الصومال" }, currency: "USD" },
+  { code: "DJ", name: { en: "Djibouti", ar: "جيبوتي" }, currency: "USD" },
+  { code: "KM", name: { en: "Comoros", ar: "جزر القمر" }, currency: "USD" },
+  { code: "SY", name: { en: "Syria", ar: "سوريا" }, currency: "USD" },
   { code: "OTHER", name: { en: "Other / Not listed", ar: "أخرى" }, currency: "USD" }
 ];
 
@@ -621,25 +627,45 @@ function currencyPadClass(sym){
 }
 
 const MARKET_PLATFORMS = {
-  EG: { lead: { en:"Egypt's e-commerce is mobile-first and price-sensitive, with heavy COD usage — video-led social platforms convert well, and Google Search captures high-intent shoppers.", ar:"التجارة الإلكترونية في مصر معتمدة على الموبايل وحساسة للسعر، مع استخدام كبير للدفع عند الاستلام — منصات الفيديو بتحوّل كويس، وجوجل بيمسك الجمهور الجاهز للشراء." }, platforms: ["Meta (Facebook/Instagram)", "TikTok", "Google Search", "Snapchat"] },
-  SA: { lead: { en:"Saudi shoppers are high-spending and increasingly mobile-native — Snapchat has outsized reach here, and Google Shopping/Search converts well for considered purchases.", ar:"المتسوق السعودي بينفق بشكل كبير وموبايل-first — سناب شات له انتشار كبير جدًا هناك، وجوجل بيحوّل كويس في المشتريات اللي بتاخد وقت قرار." }, platforms: ["Snapchat", "Meta (Facebook/Instagram)", "TikTok", "Google Ads"] },
-  AE: { lead: { en:"The UAE is a premium, multicultural market with strong purchasing power — Instagram and Google Search lead, with LinkedIn relevant for higher-ticket/B2B-adjacent products.", ar:"الإمارات سوق فاخر ومتعدد الثقافات بقوة شرائية عالية — إنستجرام وجوجل في المقدمة، ولينكدإن مناسب للمنتجات الأعلى سعرًا." }, platforms: ["Meta (Facebook/Instagram)", "Google Ads", "TikTok", "LinkedIn"] },
-  KW: { lead: { en:"Kuwait has one of the highest social media penetration rates in the Gulf — Snapchat and Instagram dominate discovery and conversion.", ar:"الكويت من أعلى دول الخليج في استخدام السوشيال ميديا — سناب شات وإنستجرام مسيطرين على الاكتشاف والتحويل." }, platforms: ["Snapchat", "Meta (Facebook/Instagram)", "TikTok"] },
-  QA: { lead: { en:"Qatar is a small, affluent, highly connected market — Instagram and Google Search are typically the strongest converting channels.", ar:"قطر سوق صغير وغني ومتصل بقوة — إنستجرام وجوجل عادة أقوى قنوات التحويل." }, platforms: ["Meta (Facebook/Instagram)", "Google Ads", "Snapchat"] },
-  BH: { lead: { en:"Bahrain's market closely mirrors Saudi/Gulf shopping habits — Instagram and Snapchat carry most of the social commerce activity.", ar:"سوق البحرين قريب من عادات الشراء الخليجية — إنستجرام وسناب شات بيحملوا معظم نشاط التجارة الاجتماعية." }, platforms: ["Meta (Facebook/Instagram)", "Snapchat", "Google Ads"] },
-  OM: { lead: { en:"Oman is a growing but smaller market — Meta platforms remain the reliable core, with TikTok picking up younger audiences.", ar:"عُمان سوق نامي بس أصغر — منصات ميتا هي الأساس الموثوق، وتيك توك بيكسب الجمهور الأصغر سنًا." }, platforms: ["Meta (Facebook/Instagram)", "TikTok", "Google Ads"] },
-  JO: { lead: { en:"Jordan's digital shoppers are concentrated in Amman and skew younger — Meta and TikTok drive most direct-response e-commerce.", ar:"المتسوقين الرقميين في الأردن متركزين في عمّان وأصغر سنًا — ميتا وتيك توك بيقودوا معظم التجارة المباشرة." }, platforms: ["Meta (Facebook/Instagram)", "TikTok", "Google Search"] },
-  LB: { lead: { en:"Lebanon's e-commerce runs largely on Instagram-driven discovery with WhatsApp closing — expect a social-to-DM funnel more than on-site checkout.", ar:"التجارة الإلكترونية في لبنان معتمدة على الاكتشاف عبر إنستجرام والإغلاق عبر واتساب — قمع من السوشيال للماسنجر أكتر من الشراء المباشر." }, platforms: ["Meta (Facebook/Instagram)", "TikTok", "Google Search"] },
-  IQ: { lead: { en:"Iraq's online shopping is still emerging and mobile-first — Facebook retains strong reach, with TikTok growing fast among younger buyers.", ar:"التسوق الإلكتروني في العراق لسه ناشئ وموبايل-first — فيسبوك له انتشار قوي، وتيك توك بينمو بسرعة بين الشباب." }, platforms: ["Meta (Facebook/Instagram)", "TikTok", "Google Search"] },
-  MA: { lead: { en:"Morocco's market splits between Arabic and French-speaking audiences — Meta platforms lead, and Google Search matters more here than elsewhere in the region.", ar:"سوق المغرب مقسوم بين جمهور عربي وفرنسي — منصات ميتا في المقدمة، وجوجل بيهم هنا أكتر من باقي المنطقة." }, platforms: ["Meta (Facebook/Instagram)", "Google Ads", "TikTok"] },
-  TN: { lead: { en:"Tunisia has a compact, connected online population — Meta platforms dominate both discovery and conversion for e-commerce.", ar:"تونس عندها جمهور رقمي مركّز ومتصل — منصات ميتا مسيطرة على الاكتشاف والتحويل للتجارة الإلكترونية." }, platforms: ["Meta (Facebook/Instagram)", "TikTok", "Google Search"] },
-  DZ: { lead: { en:"Algeria's e-commerce is early-stage relative to the Gulf — Facebook remains the anchor platform, with mobile payments still developing.", ar:"التجارة الإلكترونية في الجزائر لسه في مرحلة مبكرة مقارنة بالخليج — فيسبوك المنصة الأساسية، والدفع عبر الموبايل لسه بيتطور." }, platforms: ["Meta (Facebook/Instagram)", "TikTok"] },
-  LY: { lead: { en:"Libya's online retail is nascent and highly informal — Facebook groups/marketplace and direct messaging drive most transactions.", ar:"التجارة الإلكترونية في ليبيا ناشئة وغير رسمية جدًا — جروبات فيسبوك والماسنجر المباشر بيقودوا معظم التعاملات." }, platforms: ["Meta (Facebook/Instagram)"] },
-  SD: { lead: { en:"Sudan's digital commerce is early and constrained by connectivity — Facebook is by far the dominant platform for reaching shoppers.", ar:"التجارة الرقمية في السودان مبكرة ومحدودة بسبب الاتصال بالإنترنت — فيسبوك المنصة المسيطرة بشكل كبير." }, platforms: ["Meta (Facebook/Instagram)"] },
-  YE: { lead: { en:"Yemen's e-commerce infrastructure is limited — Facebook and WhatsApp-driven sales are the practical starting point.", ar:"البنية التحتية للتجارة الإلكترونية في اليمن محدودة — البيع عبر فيسبوك وواتساب هو نقطة البداية العملية." }, platforms: ["Meta (Facebook/Instagram)"] },
-  PS: { lead: { en:"Palestine's online shoppers are highly social-media engaged despite infrastructure challenges — Instagram and Facebook lead discovery.", ar:"المتسوقين في فلسطين نشطين جدًا على السوشيال ميديا رغم تحديات البنية التحتية — إنستجرام وفيسبوك في مقدمة الاكتشاف." }, platforms: ["Meta (Facebook/Instagram)", "TikTok"] },
-  OTHER: { lead: { en:"Pick platforms based on where your audience actually spends time — Meta is the safest broad-reach default almost anywhere in the region.", ar:"اختار المنصات حسب مكان تواجد جمهورك فعليًا — ميتا هي الخيار الآمن الأوسع انتشارًا في معظم المنطقة." }, platforms: ["Meta (Facebook/Instagram)", "Google Ads", "TikTok"] }
+  SA: { mix: [{name:"Snapchat",pct:45,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}, {name:"Instagram",pct:20,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Google",pct:20,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"TikTok",pct:15,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}], note: { en:"Snapchat reaches an estimated 89% of Saudi adults — this is not a Facebook-heavy Meta market.", ar:"سناب شات بيوصل لحوالي ٨٩٪ من الكبار في السعودية — السوق ده مش سوق ميتا/فيسبوك بالأساس." } },
+  AE: { mix: [{name:"Google",pct:25,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"Instagram",pct:25,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Snapchat",pct:20,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}, {name:"TikTok",pct:20,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"LinkedIn",pct:5,reason:{en:"Reach professional/B2B audiences",ar:"الوصول لجمهور B2B ومحترفين"}}, {name:"Facebook",pct:5,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}], note: { en:"A diversified, highly developed market across Google, Instagram, TikTok and LinkedIn.", ar:"سوق متنوع ومتطور جدًا عبر جوجل وإنستجرام وتيك توك ولينكدإن." } },
+  KW: { mix: [{name:"Snapchat",pct:30,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}, {name:"Instagram",pct:25,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Google",pct:20,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"TikTok",pct:15,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"LinkedIn",pct:5,reason:{en:"Reach professional/B2B audiences",ar:"الوصول لجمهور B2B ومحترفين"}}, {name:"Facebook",pct:5,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}], note: { en:"Snapchat reaches roughly 48% of the population — a meaningful core channel here.", ar:"سناب شات بيوصل لحوالي ٤٨٪ من السكان — قناة أساسية هنا." } },
+  QA: { mix: [{name:"Google",pct:25,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"Instagram",pct:25,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Snapchat",pct:25,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}, {name:"TikTok",pct:15,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"LinkedIn",pct:5,reason:{en:"Reach professional/B2B audiences",ar:"الوصول لجمهور B2B ومحترفين"}}, {name:"Facebook",pct:5,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}], note: { en:"Snapchat reaches about 39.5% of the population — balanced with Google and Instagram.", ar:"سناب شات بيوصل لحوالي ٣٩٫٥٪ من السكان — متوازن مع جوجل وإنستجرام." } },
+  BH: { mix: [{name:"Snapchat",pct:30,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}, {name:"Instagram",pct:25,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Google",pct:20,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"TikTok",pct:15,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"LinkedIn",pct:5,reason:{en:"Reach professional/B2B audiences",ar:"الوصول لجمهور B2B ومحترفين"}}, {name:"Facebook",pct:5,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}], note: { en:"Instagram and Snapchat each reach roughly two-thirds of the population here.", ar:"إنستجرام وسناب شات كل واحد بيوصل لحوالي ثلثي السكان هنا." } },
+  OM: { mix: [{name:"Google",pct:25,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"Instagram",pct:25,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Snapchat",pct:25,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}, {name:"TikTok",pct:15,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"LinkedIn",pct:5,reason:{en:"Reach professional/B2B audiences",ar:"الوصول لجمهور B2B ومحترفين"}}, {name:"Facebook",pct:5,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}], note: { en:"Instagram and Snapchat are both important channels in this growing market.", ar:"إنستجرام وسناب شات قنوات مهمة في السوق النامي ده." } },
+  EG: { mix: [{name:"TikTok",pct:25,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"Instagram",pct:25,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Facebook",pct:20,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}, {name:"Google",pct:20,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"Snapchat",pct:10,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}], note: { en:"TikTok's adult ad audience (~48.8M) is substantially larger than Snapchat's here — don't copy the Saudi Snapchat strategy.", ar:"جمهور تيك توك للكبار (~٤٨٫٨ مليون) أكبر بكتير من سناب شات هنا — متنسخش استراتيجية السعودية." } },
+  JO: { mix: [{name:"Google",pct:25,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"Instagram",pct:25,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"TikTok",pct:20,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"Facebook",pct:15,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}, {name:"Snapchat",pct:15,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}], note: { en:"Instagram (~4.55M) and Snapchat (~4.2M) lead, with Google capturing search intent.", ar:"إنستجرام (~٤٫٥٥ مليون) وسناب شات (~٤٫٢ مليون) في المقدمة، وجوجل بيمسك نية البحث." } },
+  IQ: { mix: [{name:"TikTok",pct:25,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"Instagram",pct:25,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Google",pct:20,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"Facebook",pct:15,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}, {name:"Snapchat",pct:15,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}], note: { en:"TikTok's adult ad audience is very large here, with Instagram (~21.5M) also strong.", ar:"جمهور تيك توك للكبار كبير جدًا هنا، وإنستجرام (~٢١٫٥ مليون) قوي كمان." } },
+  LB: { mix: [{name:"Instagram",pct:30,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Google",pct:25,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"TikTok",pct:20,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"Snapchat",pct:15,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}, {name:"Facebook",pct:10,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}], note: { en:"Instagram (~2.95M) leads, with TikTok's adult ad audience around 4.58M.", ar:"إنستجرام (~٢٫٩٥ مليون) في المقدمة، وجمهور تيك توك للكبار حوالي ٤٫٥٨ مليون." } },
+  MA: { mix: [{name:"Google",pct:25,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"Instagram",pct:25,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Facebook",pct:20,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}, {name:"TikTok",pct:20,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"Snapchat",pct:10,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}], note: { en:"Not a Saudi-style Snapchat market — Snapchat reaches only ~19.8% of the population here.", ar:"مش سوق سناب شات زي السعودية — سناب شات بيوصل لحوالي ١٩٫٨٪ بس من السكان هنا." } },
+  DZ: { mix: [{name:"Google",pct:25,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"Instagram",pct:25,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Facebook",pct:25,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}, {name:"TikTok",pct:20,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"Snapchat",pct:5,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}], note: { en:"Instagram (~13.5M) leads; Snapchat's relative reach is much lower than in the Gulf.", ar:"إنستجرام (~١٣٫٥ مليون) في المقدمة؛ انتشار سناب شات أقل بكتير من الخليج." } },
+  TN: { mix: [{name:"Google",pct:25,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"Instagram",pct:25,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Facebook",pct:25,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}, {name:"TikTok",pct:20,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"Snapchat",pct:5,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}], note: { en:"Snapchat reaches only about 16.5% of the population — far less important than in Gulf markets.", ar:"سناب شات بيوصل لحوالي ١٦٫٥٪ بس من السكان — أهميته أقل بكتير من أسواق الخليج." } },
+  LY: { mix: [{name:"Google",pct:25,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"Instagram",pct:25,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Facebook",pct:25,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}, {name:"TikTok",pct:20,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"Snapchat",pct:5,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}], note: { en:"Similar profile to neighboring North African markets — Meta and Google lead.", ar:"نفس نمط الأسواق المجاورة في شمال أفريقيا — ميتا وجوجل في المقدمة." } },
+  MR: { mix: [{name:"TikTok",pct:30,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"Google",pct:25,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"Facebook",pct:25,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}, {name:"Instagram",pct:15,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Snapchat",pct:5,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}], note: { en:"TikTok and Facebook lead reach; Snapchat plays a minor role in this market.", ar:"تيك توك وفيسبوك في المقدمة؛ سناب شات دوره محدود في السوق ده." } },
+  SD: { mix: [{name:"TikTok",pct:30,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"Google",pct:25,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"Facebook",pct:25,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}, {name:"Instagram",pct:15,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Snapchat",pct:5,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}], note: { en:"Facebook and TikTok are the practical starting channels given connectivity constraints.", ar:"فيسبوك وتيك توك القنوات العملية للبداية بسبب محدودية الاتصال بالإنترنت." } },
+  SO: { mix: [{name:"TikTok",pct:35,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"Google",pct:25,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"Facebook",pct:20,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}, {name:"Instagram",pct:15,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Snapchat",pct:5,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}], note: { en:"TikTok leads reach in this market, with Facebook as a secondary channel.", ar:"تيك توك بيقود الانتشار في السوق ده، وفيسبوك قناة ثانوية." } },
+  DJ: { mix: [{name:"TikTok",pct:30,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"Google",pct:25,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"Facebook",pct:25,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}, {name:"Instagram",pct:15,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Snapchat",pct:5,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}], note: { en:"TikTok and Facebook are the strongest starting channels here.", ar:"تيك توك وفيسبوك أقوى قنوات للبداية هنا." } },
+  KM: { mix: [{name:"Facebook",pct:30,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}, {name:"TikTok",pct:30,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"Google",pct:25,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"Instagram",pct:10,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Snapchat",pct:5,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}], note: { en:"Facebook and TikTok lead this smaller, less-developed digital market.", ar:"فيسبوك وتيك توك في المقدمة في السوق الرقمي الأصغر والأقل تطورًا ده." } },
+  SY: { mix: [{name:"Google",pct:55,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"Facebook",pct:30,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}, {name:"Instagram",pct:10,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"TikTok",pct:5,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}], note: { en:"⚠️ Syria has unusually constrained ad platform availability and audience data — TikTok's ad audience was only ~46.5K adults in late 2025, so don't treat it as a normal scaled channel here.", ar:"⚠️ سوريا عندها قيود غير طبيعية على توفر منصات الإعلانات والبيانات — جمهور إعلانات تيك توك كان ~٤٦٫٥ ألف بس أواخر ٢٠٢٥، فمتعاملهوش كقناة عادية موسّعة هنا." } },
+  YE: { mix: [{name:"Google",pct:30,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"TikTok",pct:30,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"Facebook",pct:25,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}, {name:"Instagram",pct:10,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"Snapchat",pct:5,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}], note: { en:"Google and TikTok lead, with Facebook as an important secondary channel.", ar:"جوجل وتيك توك في المقدمة، وفيسبوك قناة ثانوية مهمة." } },
+  PS: { mix: [{name:"Google",pct:25,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}}, {name:"Instagram",pct:25,reason:{en:"Strong visual/social discovery",ar:"اكتشاف بصري واجتماعي قوي"}}, {name:"TikTok",pct:20,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}, {name:"Facebook",pct:15,reason:{en:"Not recommended as a core starting channel",ar:"مش موصى بيه كقناة أساسية للبداية"}}, {name:"Snapchat",pct:15,reason:{en:"High priority for consumer reach",ar:"أولوية عالية للوصول للمستهلك"}}], note: { en:"Highly social-media engaged despite infrastructure challenges.", ar:"جمهور نشط جدًا على السوشيال ميديا رغم تحديات البنية التحتية." } },
+  OTHER: { mix: [{name:"Meta (Facebook/Instagram)",pct:40,reason:{en:"Safe broad-reach default",ar:"خيار آمن وواسع الانتشار"}},{name:"Google",pct:35,reason:{en:"Capture active purchase/search intent",ar:"مسك نية الشراء/البحث الفعلي"}},{name:"TikTok",pct:25,reason:{en:"Reach + creative testing",ar:"وصول + اختبار كرياتيف"}}], note: { en:"Pick platforms based on where your audience actually spends time.", ar:"اختار المنصات حسب مكان تواجد جمهورك فعليًا." } }
 };
+
+
+const CAMPAIGN_OBJECTIVES = [
+  { id: "ecommerce", name: { en: "E-commerce", ar: "تجارة إلكترونية" }, icon: "🛒",
+    boost: ["Snapchat","Instagram","TikTok","Google"] },
+  { id: "leadgen", name: { en: "Lead Generation", ar: "توليد ليدز" }, icon: "🎯",
+    boost: ["Google","Meta (Facebook/Instagram)","Facebook","Instagram","Snapchat"] },
+  { id: "b2b", name: { en: "B2B", ar: "بيزنس تو بيزنس" }, icon: "🏢",
+    boost: ["Google","LinkedIn","Meta (Facebook/Instagram)","Facebook","Instagram"] },
+  { id: "appinstalls", name: { en: "App Installs", ar: "تحميل التطبيق" }, icon: "📱",
+    boost: ["Google","TikTok","Meta (Facebook/Instagram)","Facebook","Instagram","Snapchat"] },
+  { id: "awareness", name: { en: "Awareness", ar: "الوعي" }, icon: "👀",
+    boost: ["Snapchat","TikTok","Instagram","Google"] },
+];
+
 
 const MARKET_AUDIENCE = {
   EG: { age: "22–38", interests: { en:["Online shopping","Fashion & beauty","Mobile payments","Influencer content"], ar:["التسوق الإلكتروني","الموضة والجمال","الدفع عبر الموبايل","محتوى المؤثرين"] }, behavior: { en:"Mobile-first shoppers, price-comparing before purchase, high trust in COD.", ar:"متسوقين عبر الموبايل بشكل أساسي، بيقارنوا الأسعار قبل الشراء، وثقة عالية في الدفع عند الاستلام." } },
@@ -814,11 +840,13 @@ function getCategorySplit(categoryId){
   return profile ? profile.split : DEFAULT_SPLIT;
 }
 
-// Normalize platform names so "Meta (Facebook/Instagram)" / "Meta" / "Google Search" / "Google Ads"
-// are all recognized as the same underlying platform for ordering purposes.
+// Normalize platform names so variants of the same platform are recognized consistently.
+// Facebook and Instagram are treated as distinct platforms (real data separates them);
+// "Meta (Facebook/Instagram)" from category profiles maps to Facebook for ordering purposes.
 function normalizePlatformName(name){
   const n = (name || '').toLowerCase();
-  if (n.includes('meta') || n.includes('facebook') || n.includes('instagram')) return 'meta';
+  if (n.includes('instagram')) return 'instagram';
+  if (n.includes('meta') || n.includes('facebook')) return 'facebook';
   if (n.includes('google')) return 'google';
   if (n.includes('tiktok')) return 'tiktok';
   if (n.includes('snapchat')) return 'snapchat';
@@ -827,12 +855,12 @@ function normalizePlatformName(name){
   return n;
 }
 
-// Reorder the category's % split to follow the country's platform-priority order
-// (market.platforms), so the split chart and the priority pills always agree.
-// Any category platform not present in the country's priority list is appended at the end.
-function reorderSplitByMarketPriority(split, marketPlatforms){
-  if (!marketPlatforms || !marketPlatforms.length) return split;
-  const priorityOrder = marketPlatforms.map(normalizePlatformName);
+// Reorder the category's % split to follow the country's real platform mix order
+// (market.mix, sorted by real % share), so the split chart and the platform-mix box agree.
+// Any category platform not present in the country's mix is appended at the end.
+function reorderSplitByMarketPriority(split, marketMix){
+  if (!marketMix || !marketMix.length) return split;
+  const priorityOrder = marketMix.map(p => normalizePlatformName(p.name));
   const ranked = [...split].sort((a, b) => {
     const ai = priorityOrder.indexOf(normalizePlatformName(a[0]));
     const bi = priorityOrder.indexOf(normalizePlatformName(b[0]));
@@ -952,7 +980,7 @@ function renderPanel(){
   const profitable = s.netProfit > 0;
   const market = MARKET_PLATFORMS[cat.country] || MARKET_PLATFORMS.OTHER;
   const audience = MARKET_AUDIENCE[cat.country] || MARKET_AUDIENCE.OTHER;
-  const categorySplit = reorderSplitByMarketPriority(getCategorySplit(cat.categoryInput), market.platforms);
+  const categorySplit = reorderSplitByMarketPriority(getCategorySplit(cat.categoryInput), market.mix);
   const categoryAudience = getCategoryAudience(cat.categoryInput);
   const cur = cat.currency || "USD";
   const curSym = CURRENCY_SYMBOL[cur] || '$';
@@ -1012,10 +1040,19 @@ function renderPanel(){
     </div>
 
     <div class="platform-box">
-      <div class="lead">${market.lead[LANG] || market.lead.en}</div>
-      <div class="platform-pills">
-        ${market.platforms.map((p,i) => `<span class="platform-pill"><span class="rank">${i+1}</span>${p}</span>`).join('')}
+      <div class="mix-list">
+        ${market.mix.map(p => `
+          <div class="mix-row ${p.pct===0?'mix-row-off':''}">
+            <div class="mix-row-top">
+              <span class="mix-name">${p.name}</span>
+              <span class="mix-pct">${p.pct>0 ? p.pct+'%' : (LANG==='ar'?'غير موصى بيه':'Not recommended')}</span>
+            </div>
+            <div class="mix-reason">${p.reason[LANG] || p.reason.en}</div>
+          </div>
+        `).join('')}
       </div>
+      <div class="mix-note">${market.note[LANG] || market.note.en}</div>
+      <div class="mix-disclaimer">${tr('mixDisclaimer')}</div>
     </div>
 
     <div class="audience-box">
@@ -1268,7 +1305,7 @@ function renderPanel(){
 
 function refreshCategoryDependentSections(cat){
   const market = MARKET_PLATFORMS[cat.country] || MARKET_PLATFORMS.OTHER;
-  const categorySplit = reorderSplitByMarketPriority(getCategorySplit(cat.categoryInput), market.platforms);
+  const categorySplit = reorderSplitByMarketPriority(getCategorySplit(cat.categoryInput), market.mix);
   const categoryAudience = getCategoryAudience(cat.categoryInput);
   const cur = cat.currency || "USD";
 
@@ -1355,7 +1392,7 @@ function refreshCategoryDependentSections(cat){
 
 function updatePlatformTargets(cat){
   const market = MARKET_PLATFORMS[cat.country] || MARKET_PLATFORMS.OTHER;
-  const categorySplit = reorderSplitByMarketPriority(getCategorySplit(cat.categoryInput), market.platforms);
+  const categorySplit = reorderSplitByMarketPriority(getCategorySplit(cat.categoryInput), market.mix);
   const cur = cat.currency || "USD";
   categorySplit.forEach(([name, pct]) => {
     const card = [...document.querySelectorAll('.ptarget-card')].find(c => c.querySelector('.ptarget-name').textContent === name);
