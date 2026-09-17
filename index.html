@@ -855,20 +855,36 @@ function normalizePlatformName(name){
   return n;
 }
 
-// Reorder the category's % split to follow the country's real platform mix order
-// (market.mix, sorted by real % share), so the split chart and the platform-mix box agree.
-// Any category platform not present in the country's mix is appended at the end.
-function reorderSplitByMarketPriority(split, marketMix){
-  if (!marketMix || !marketMix.length) return split;
-  const priorityOrder = marketMix.map(p => normalizePlatformName(p.name));
-  const ranked = [...split].sort((a, b) => {
-    const ai = priorityOrder.indexOf(normalizePlatformName(a[0]));
-    const bi = priorityOrder.indexOf(normalizePlatformName(b[0]));
-    const aRank = ai === -1 ? 999 : ai;
-    const bRank = bi === -1 ? 999 : bi;
-    return aRank - bRank;
-  });
-  return ranked;
+// Builds the ACTUAL platform split shown in "Recommended platform split" and used for
+// platform targets/analysis. The country's real % mix (market.mix, from real audience-reach
+// data) is the primary source — the category only narrows down to the platforms relevant to
+// that vertical (dropping ones the category profile doesn't use) and the country's real
+// percentages are then renormalized to sum to 100% across just those platforms.
+// This ensures two different countries with the same category NEVER show identical numbers,
+// since the underlying reach data genuinely differs by country.
+function getEffectiveSplit(categoryId, marketMix){
+  if (!marketMix || !marketMix.length) return DEFAULT_SPLIT;
+  const profile = categoryId ? CATEGORY_PROFILES.find(p => p.id === categoryId) : null;
+
+  // Which platforms (normalized) does this category consider relevant?
+  const relevantSet = profile
+    ? new Set(profile.split.map(([name]) => normalizePlatformName(name)))
+    : null; // no category selected → use the country's full real mix as-is
+
+  // Filter the country's real mix down to relevant platforms (or keep all if no category set)
+  let filtered = marketMix.filter(p => p.pct > 0 && (!relevantSet || relevantSet.has(normalizePlatformName(p.name))));
+
+  // If category filtering removed everything (no overlap), fall back to the country's full real mix
+  if (!filtered.length) filtered = marketMix.filter(p => p.pct > 0);
+
+  // Renormalize the filtered real percentages to sum to 100
+  const total = filtered.reduce((s, p) => s + p.pct, 0);
+  if (total <= 0) return DEFAULT_SPLIT;
+  const renormalized = filtered
+    .map(p => [p.name, Math.round((p.pct / total) * 100)])
+    .sort((a, b) => b[1] - a[1]);
+
+  return renormalized;
 }
 
 // ===== Objectives: top 5 ad platform objectives =====
@@ -980,7 +996,7 @@ function renderPanel(){
   const profitable = s.netProfit > 0;
   const market = MARKET_PLATFORMS[cat.country] || MARKET_PLATFORMS.OTHER;
   const audience = MARKET_AUDIENCE[cat.country] || MARKET_AUDIENCE.OTHER;
-  const categorySplit = reorderSplitByMarketPriority(getCategorySplit(cat.categoryInput), market.mix);
+  const categorySplit = getEffectiveSplit(cat.categoryInput, market.mix);
   const categoryAudience = getCategoryAudience(cat.categoryInput);
   const cur = cat.currency || "USD";
   const curSym = CURRENCY_SYMBOL[cur] || '$';
@@ -1305,7 +1321,7 @@ function renderPanel(){
 
 function refreshCategoryDependentSections(cat){
   const market = MARKET_PLATFORMS[cat.country] || MARKET_PLATFORMS.OTHER;
-  const categorySplit = reorderSplitByMarketPriority(getCategorySplit(cat.categoryInput), market.mix);
+  const categorySplit = getEffectiveSplit(cat.categoryInput, market.mix);
   const categoryAudience = getCategoryAudience(cat.categoryInput);
   const cur = cat.currency || "USD";
 
@@ -1392,7 +1408,7 @@ function refreshCategoryDependentSections(cat){
 
 function updatePlatformTargets(cat){
   const market = MARKET_PLATFORMS[cat.country] || MARKET_PLATFORMS.OTHER;
-  const categorySplit = reorderSplitByMarketPriority(getCategorySplit(cat.categoryInput), market.mix);
+  const categorySplit = getEffectiveSplit(cat.categoryInput, market.mix);
   const cur = cat.currency || "USD";
   categorySplit.forEach(([name, pct]) => {
     const card = [...document.querySelectorAll('.ptarget-card')].find(c => c.querySelector('.ptarget-name').textContent === name);
