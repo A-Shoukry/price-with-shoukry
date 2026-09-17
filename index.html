@@ -161,13 +161,17 @@
   .split-box{background:#fdf3ec;border-radius:8px;padding:16px 18px;margin-top:12px}
   .split-box .sbox-title{font-size:12.5px;color:var(--clay);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-bottom:3px}
   .split-box .sbox-sub{font-size:12px;color:var(--muted);margin-bottom:12px}
-  .split-bars{display:flex;flex-direction:column;gap:8px}
+  .split-bars{display:flex;flex-direction:column;gap:9px}
   .split-row{display:flex;align-items:center;gap:10px}
   .split-row .sp-name{font-size:12.5px;font-weight:600;color:var(--ink);width:78px;flex-shrink:0}
-  .split-row .sp-track{flex:1;height:9px;border-radius:6px;background:#f0e2d5;overflow:hidden}
-  .split-row .sp-fill{height:100%;background:var(--clay);border-radius:6px}
-  .split-row .sp-pct{font-size:12.5px;font-weight:700;color:var(--clay);width:36px;text-align:right;flex-shrink:0}
-  body.rtl .split-row .sp-pct{text-align:left}
+  .split-row .sp-track{flex:1;height:22px;border-radius:6px;background:#f0e2d5;overflow:hidden;position:relative}
+  .split-row .sp-fill{
+    height:100%;background:linear-gradient(90deg,var(--clay),#c9633f);border-radius:6px;
+    display:flex;align-items:center;justify-content:flex-end;padding-right:8px;
+    min-width:32px;box-sizing:border-box;transition:width .3s ease;
+  }
+  .split-row .sp-fill .sp-pct-inline{font-size:11px;font-weight:700;color:#fff;white-space:nowrap}
+  body.rtl .split-row .sp-fill{justify-content:flex-start;padding-right:0;padding-left:8px}
 
   /* ===== Platform targets ===== */
   .ptarget-list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
@@ -198,6 +202,7 @@
   .analysis-row .ar-name{font-weight:700;font-size:13px;color:#4a3f8c;width:76px;flex-shrink:0}
   .analysis-row .ar-range{font-size:12px;color:var(--muted);flex:1;min-width:140px}
   .analysis-row .ar-range b{color:var(--ink)}
+  .analysis-row .ar-band{font-size:10.5px;color:var(--muted);opacity:.8}
   .analysis-row .ar-orders{margin-left:auto;text-align:right;flex-shrink:0}
   body.rtl .analysis-row .ar-orders{margin-left:0;margin-right:auto;text-align:left}
   .analysis-row .ar-orders .ao-num{font-family:'Fraunces',serif;font-weight:700;font-size:16px;color:#4a3f8c}
@@ -532,7 +537,7 @@ const T = {
     perMonth: "per month.",
     empty: "No category selected", emptySub: "Add a category or market on the left to start planning.",
     removeAria: "Remove",
-    categoryLabel: "Product / service category", categoryPlaceholder: "e.g. Fashion, Beauty, Electronics...",
+    categoryLabel: "Product / service category", categoryPlaceholder: "Select a category...",
     platformSplitTitle: "Recommended platform split", platformSplitSub: "Based on your country and category",
     objectiveLabel: "What's your objective?", objectiveSub: "This changes what the estimate below measures",
     platformTargetsTitle: "Estimated results per platform", platformCpaLabel: "CPA",
@@ -540,8 +545,8 @@ const T = {
     analysisTitle: "Market & Category Analysis",
     analysisSub: "A quick read on your market + category, with rough estimated CPA ranges and order counts to sanity-check your plan against.",
     analysisDisclaimer: "These CPA ranges are rough starting estimates based on general category/market patterns — not measured benchmarks. Always replace with your own real account data once you have it.",
-    analysisEstOrders: "Est. orders at this CPA range",
-    analysisCpaRange: "Est. CPA range"
+    analysisEstOrders: "Est. orders at this CPA",
+    analysisCpaRange: "Avg. CPA"
   },
   ar: {
     title: "Price with Shoukry — سعّرها صح",
@@ -567,7 +572,7 @@ const T = {
     perMonth: "شهريًا.",
     empty: "مفيش فئة متختارة", emptySub: "ضيف فئة أو سوق من الشمال عشان تبدأ التخطيط.",
     removeAria: "حذف",
-    categoryLabel: "فئة المنتج / الخدمة", categoryPlaceholder: "مثال: أزياء، جمال، إلكترونيات...",
+    categoryLabel: "فئة المنتج / الخدمة", categoryPlaceholder: "اختار فئة...",
     platformSplitTitle: "التوزيع المقترح على المنصات", platformSplitSub: "بناءً على دولتك وفئة نشاطك",
     objectiveLabel: "إيه هدفك؟", objectiveSub: "ده بيغيّر إيه اللي بنقيسه في التقدير تحت",
     platformTargetsTitle: "النتائج المتوقعة لكل منصة", platformCpaLabel: "التكلفة (CPA)",
@@ -575,8 +580,8 @@ const T = {
     analysisTitle: "تحليل السوق والفئة",
     analysisSub: "نظرة سريعة على سوقك وفئة نشاطك، مع نطاقات تقديرية تقريبية للـ CPA وعدد الأوردرات المتوقع عشان تراجع خطتك عليها.",
     analysisDisclaimer: "نطاقات الـ CPA دي تقديرات تقريبية بناءً على أنماط عامة للفئة والسوق — مش أرقام مقاسة فعليًا. استبدلها ببيانات حسابك الحقيقية أول ما تكون متاحة.",
-    analysisEstOrders: "عدد الأوردرات المتوقع في نطاق الـ CPA ده",
-    analysisCpaRange: "نطاق الـ CPA التقديري"
+    analysisEstOrders: "عدد الأوردرات المتوقع بالـ CPA ده",
+    analysisCpaRange: "متوسط الـ CPA"
   }
 };
 
@@ -658,9 +663,9 @@ const MARKET_AUDIENCE = {
 };
 
 const SEED_CATEGORIES = [
-  { id: 1, name: "Fashion — Egypt", country: "EG", currency: "EGP", budget: 15000, margin: 100, cost: 350, packaging: 15, shipping: 45, cpa: 130, successRate: 90, useSalaries: false, salaries: 0, categoryInput: "Fashion", objective: "sales", platformCPAs: {} },
-  { id: 2, name: "Beauty — Saudi Arabia", country: "SA", currency: "SAR", budget: 22000, margin: 90, cost: 60, packaging: 8, shipping: 20, cpa: 35, successRate: 92, useSalaries: true, salaries: 4000, categoryInput: "Beauty", objective: "sales", platformCPAs: {} },
-  { id: 3, name: "Home Goods — UAE", country: "AE", currency: "AED", budget: 9000, margin: 75, cost: 140, packaging: 12, shipping: 30, cpa: 70, successRate: 88, useSalaries: false, salaries: 0, categoryInput: "Home Goods", objective: "sales", platformCPAs: {} }
+  { id: 1, name: "Fashion — Egypt", country: "EG", currency: "EGP", budget: 15000, margin: 100, cost: 350, packaging: 15, shipping: 45, cpa: 130, successRate: 90, useSalaries: false, salaries: 0, categoryInput: "fashion", objective: "sales", platformCPAs: {} },
+  { id: 2, name: "Beauty — Saudi Arabia", country: "SA", currency: "SAR", budget: 22000, margin: 90, cost: 60, packaging: 8, shipping: 20, cpa: 35, successRate: 92, useSalaries: true, salaries: 4000, categoryInput: "beauty", objective: "sales", platformCPAs: {} },
+  { id: 3, name: "Home Goods — UAE", country: "AE", currency: "AED", budget: 9000, margin: 75, cost: 140, packaging: 12, shipping: 30, cpa: 70, successRate: 88, useSalaries: false, salaries: 0, categoryInput: "furniture", objective: "sales", platformCPAs: {} }
 ];
 
 const SESSION_KEY = 'pws_session_v1';
@@ -694,47 +699,58 @@ if (_saved && _saved.LANG) LANG = _saved.LANG;
 // ===== Category keyword profiles: platform % split by vertical =====
 // Percentages are guidance splits of the TOTAL budget across relevant platforms.
 const CATEGORY_PROFILES = [
-  { keywords: ["fashion","clothes","clothing","apparel","dress","wear"],
+  { id: "fashion", name: { en: "Fashion & Apparel", ar: "الموضة والملابس" },
+    keywords: ["fashion","clothes","clothing","apparel","dress","wear"],
     split: [ ["Meta",50], ["TikTok",20], ["Google",20], ["Snapchat",10] ], cpaTier: 1.0,
     interests: { en:["Fashion","Online shopping","Clothing","Fast fashion"], ar:["الموضة","التسوق الإلكتروني","الملابس","فاست فاشون"] },
     behavior: { en:"Visually driven, influenced by trends and influencer content, high impulse-buy tendency.", ar:"جمهور بصري بيتأثر بالترندات ومحتوى المؤثرين، وميل عالي للشراء الاندفاعي." } },
-  { keywords: ["beauty","cosmetic","makeup","skincare","perfume"],
+  { id: "beauty", name: { en: "Beauty & Cosmetics", ar: "الجمال ومستحضرات التجميل" },
+    keywords: ["beauty","cosmetic","makeup","skincare","perfume"],
     split: [ ["Meta",55], ["TikTok",25], ["Google",15], ["Snapchat",5] ], cpaTier: 1.0,
     interests: { en:["Beauty","Cosmetics","Skin care","Make-up"], ar:["الجمال","مستحضرات التجميل","العناية بالبشرة","المكياج"] },
     behavior: { en:"Reviews and tutorials drive purchase decisions; strong response to before/after content.", ar:"المراجعات والدروس بتأثر على قرار الشراء؛ استجابة قوية لمحتوى قبل/بعد." } },
-  { keywords: ["electronics","gadget","mobile","phone","laptop","tech"],
+  { id: "electronics", name: { en: "Electronics & Tech", ar: "الإلكترونيات والتكنولوجيا" },
+    keywords: ["electronics","gadget","mobile","phone","laptop","tech"],
     split: [ ["Google",40], ["Meta",35], ["TikTok",15], ["LinkedIn",10] ], cpaTier: 1.8,
     interests: { en:["Consumer electronics","Smartphones","Technology","Online shopping"], ar:["الإلكترونيات الاستهلاكية","الهواتف الذكية","التكنولوجيا","التسوق الإلكتروني"] },
     behavior: { en:"Research-heavy buyers who compare specs and prices before purchase; longer decision cycle.", ar:"مشترين بيبحثوا كتير ويقارنوا المواصفات والأسعار قبل الشراء؛ دورة قرار أطول." } },
-  { keywords: ["food","restaurant","cafe","coffee","delivery","grocery"],
+  { id: "food", name: { en: "Food & Beverage", ar: "الطعام والمشروبات" },
+    keywords: ["food","restaurant","cafe","coffee","delivery","grocery"],
     split: [ ["Meta",50], ["TikTok",25], ["Snapchat",15], ["Google",10] ], cpaTier: 0.6,
     interests: { en:["Food","Restaurants","Online food ordering","Fast food"], ar:["الطعام","المطاعم","طلب الطعام أونلاين","الوجبات السريعة"] },
     behavior: { en:"Impulse-driven, responsive to visuals of food and limited-time offers.", ar:"قرارات اندفاعية، وبيستجيبوا لصور الأكل والعروض المحدودة." } },
-  { keywords: ["furniture","home","decor","household","furnishing"],
+  { id: "furniture", name: { en: "Home & Furniture", ar: "المنزل والأثاث" },
+    keywords: ["furniture","home","decor","household","furnishing"],
     split: [ ["Meta",50], ["Google",25], ["TikTok",15], ["Snapchat",10] ], cpaTier: 1.4,
     interests: { en:["Home improvement","Interior design","Furniture","Home appliances"], ar:["تحسين المنزل","التصميم الداخلي","الأثاث","الأجهزة المنزلية"] },
     behavior: { en:"Longer research phase, inspired by visual platforms like Instagram/Pinterest-style content.", ar:"مرحلة بحث أطول، وبيتأثروا بمحتوى بصري زي إنستجرام." } },
-  { keywords: ["car","cars","automotive","vehicle","auto","dealership"],
+  { id: "automotive", name: { en: "Automotive", ar: "السيارات" },
+    keywords: ["car","cars","automotive","vehicle","auto","dealership"],
     split: [ ["Google",40], ["Meta",35], ["TikTok",10], ["Twitter",15] ], cpaTier: 2.5,
     interests: { en:["Automotive industry","Vehicles","Car dealerships","Car finance"], ar:["صناعة السيارات","المركبات","معارض السيارات","تمويل السيارات"] },
     behavior: { en:"High-consideration purchase — heavy research, comparison across brands, long decision cycle.", ar:"قرار شراء كبير — بحث مكثف ومقارنة بين البراندات ودورة قرار طويلة." } },
-  { keywords: ["b2b","industrial","machinery","wholesale","manufacturing","corporate"],
+  { id: "b2b", name: { en: "B2B & Industrial", ar: "قطاع الأعمال والصناعة" },
+    keywords: ["b2b","industrial","machinery","wholesale","manufacturing","corporate"],
     split: [ ["Google",40], ["LinkedIn",35], ["Meta",25] ], cpaTier: 3.0,
     interests: { en:["Business","Small business","Industry","B2B marketing"], ar:["الأعمال","المشاريع الصغيرة","الصناعة","تسويق B2B"] },
     behavior: { en:"Decision-makers researching solutions for their business — longer sales cycle, LinkedIn-driven.", ar:"صناع قرار بيدوروا على حلول لشركتهم — دورة بيع أطول ومعتمدة على لينكدإن." } },
-  { keywords: ["education","course","school","university","learning","training"],
+  { id: "education", name: { en: "Education & Courses", ar: "التعليم والدورات" },
+    keywords: ["education","course","school","university","learning","training"],
     split: [ ["Meta",40], ["Google",30], ["TikTok",15], ["LinkedIn",15] ], cpaTier: 1.6,
     interests: { en:["Education","Online learning","Higher education","Distance education"], ar:["التعليم","التعلّم عن بُعد","التعليم العالي","الدراسة عن بُعد"] },
     behavior: { en:"Researches curriculum and reviews before enrolling; price and outcome sensitive.", ar:"بيبحث عن المنهج والمراجعات قبل التسجيل؛ حساس للسعر والنتيجة." } },
-  { keywords: ["real estate","property","apartment","villa","compound"],
+  { id: "realestate", name: { en: "Real Estate", ar: "العقارات" },
+    keywords: ["real estate","property","apartment","villa","compound"],
     split: [ ["Meta",45], ["Google",30], ["TikTok",15], ["Twitter",10] ], cpaTier: 4.0,
     interests: { en:["Real estate","Real estate investment","Apartments","Property"], ar:["العقارات","الاستثمار العقاري","الشقق","الممتلكات"] },
     behavior: { en:"Very high-consideration purchase — multiple touchpoints, long decision cycle, high-value lead.", ar:"قرار شراء كبير جدًا — نقاط تواصل متعددة ودورة قرار طويلة وليد عالي القيمة." } },
-  { keywords: ["jewelry","accessories","watch","luxury"],
+  { id: "jewelry", name: { en: "Jewelry & Luxury", ar: "المجوهرات والسلع الفاخرة" },
+    keywords: ["jewelry","accessories","watch","luxury"],
     split: [ ["Meta",55], ["TikTok",20], ["Google",15], ["Snapchat",10] ], cpaTier: 1.3,
     interests: { en:["Jewelry","Luxury goods","Watches","Fashion accessories"], ar:["المجوهرات","السلع الفاخرة","الساعات","إكسسوارات الموضة"] },
     behavior: { en:"Gift-occasion driven purchases, values craftsmanship and brand story.", ar:"شراء مرتبط بمناسبات الهدايا، وبيقيّموا الحرفية وقصة البراند." } },
-  { keywords: ["fitness","gym","sports","supplement","health"],
+  { id: "fitness", name: { en: "Fitness & Health", ar: "اللياقة والصحة" },
+    keywords: ["fitness","gym","sports","supplement","health"],
     split: [ ["Meta",50], ["TikTok",30], ["Google",15], ["Snapchat",5] ], cpaTier: 0.9,
     interests: { en:["Physical fitness","Gyms","Bodybuilding","Nutrition"], ar:["اللياقة البدنية","الجيم","كمال الأجسام","التغذية"] },
     behavior: { en:"Motivated by transformation content and influencer routines; subscription-friendly.", ar:"متحمسين بمحتوى التحول وروتين المؤثرين؛ مقبولين على الاشتراكات." } },
@@ -746,13 +762,10 @@ const DEFAULT_CATEGORY_AUDIENCE = {
   behavior: { en:"No specific category selected yet — showing general market behavior for this country.", ar:"لسه معملتش فئة محددة — بنعرض السلوك العام للسوق ده." }
 };
 
-function getCategoryAudience(input){
-  const q = (input || '').trim().toLowerCase();
-  if (!q) return DEFAULT_CATEGORY_AUDIENCE;
-  for (const profile of CATEGORY_PROFILES){
-    if (profile.keywords.some(k => q.includes(k))) return { interests: profile.interests, behavior: profile.behavior };
-  }
-  return DEFAULT_CATEGORY_AUDIENCE;
+function getCategoryAudience(categoryId){
+  if (!categoryId) return DEFAULT_CATEGORY_AUDIENCE;
+  const profile = CATEGORY_PROFILES.find(p => p.id === categoryId);
+  return profile ? { interests: profile.interests, behavior: profile.behavior } : DEFAULT_CATEGORY_AUDIENCE;
 }
 
 // Rough relative cost-of-advertising multiplier by country (USD-equivalent baseline = 1.0).
@@ -762,31 +775,29 @@ const COUNTRY_CPA_MULT = {
   MA:0.7, TN:0.6, DZ:0.6, LY:0.5, SD:0.4, YE:0.4, PS:0.6, OTHER:1.0
 };
 
-// Base CPA range in USD-equivalent for a "tier 1.0" category in a "1.0x" country — a rough
+// Base AVERAGE CPA in USD-equivalent for a "tier 1.0" category in a "1.0x" country — a rough
 // starting point for testing, not a measured benchmark. Per-platform relative cost factors
 // reflect typical relative auction costs (Google/LinkedIn tend to run higher than TikTok/Snapchat).
-const BASE_CPA_USD = { low: 3, high: 9 };
+const BASE_CPA_USD_AVG = 5;
+const CPA_VARIANCE = 0.15; // ±15% band around the average, kept tight rather than a wide spread
 const PLATFORM_CPA_FACTOR = { meta:1.0, google:1.4, tiktok:0.7, snapchat:0.8, linkedin:2.2, twitter:1.1 };
 
-function getCategoryCpaTier(input){
-  const q = (input || '').trim().toLowerCase();
-  if (!q) return DEFAULT_CPA_TIER;
-  for (const profile of CATEGORY_PROFILES){
-    if (profile.keywords.some(k => q.includes(k))) return profile.cpaTier || DEFAULT_CPA_TIER;
-  }
-  return DEFAULT_CPA_TIER;
+function getCategoryCpaTier(categoryId){
+  if (!categoryId) return DEFAULT_CPA_TIER;
+  const profile = CATEGORY_PROFILES.find(p => p.id === categoryId);
+  return profile ? (profile.cpaTier || DEFAULT_CPA_TIER) : DEFAULT_CPA_TIER;
 }
 
-// Returns a rough estimated CPA range [low, high] in the category's own currency for a given platform.
-function estimatePlatformCpaRange(platformName, countryCode, categoryInput, currencyCode, usdRate){
+// Returns { avg, low, high } — a single average CPA estimate with a tight ±variance band,
+// in the category's own currency, for a given platform.
+function estimatePlatformCpa(platformName, countryCode, categoryInput, currencyCode, usdRate){
   const tier = getCategoryCpaTier(categoryInput);
   const countryMult = COUNTRY_CPA_MULT[countryCode] || 1.0;
   const platFactor = PLATFORM_CPA_FACTOR[normalizePlatformName(platformName)] || 1.0;
-  const lowUsd = BASE_CPA_USD.low * tier * countryMult * platFactor;
-  const highUsd = BASE_CPA_USD.high * tier * countryMult * platFactor;
-  // Convert from USD-equivalent to the category's own currency using a rough fixed rate table.
+  const avgUsd = BASE_CPA_USD_AVG * tier * countryMult * platFactor;
   const rate = usdRate || 1;
-  return [lowUsd * rate, highUsd * rate];
+  const avg = avgUsd * rate;
+  return { avg, low: avg * (1 - CPA_VARIANCE), high: avg * (1 + CPA_VARIANCE) };
 }
 
 // Very rough USD conversion multipliers, for translating the USD-based CPA heuristic into
@@ -797,13 +808,10 @@ const USD_APPROX_RATE = {
   EUR:0.92, GBP:0.79
 };
 
-function getCategorySplit(input){
-  const q = (input || '').trim().toLowerCase();
-  if (!q) return DEFAULT_SPLIT;
-  for (const profile of CATEGORY_PROFILES){
-    if (profile.keywords.some(k => q.includes(k))) return profile.split;
-  }
-  return DEFAULT_SPLIT;
+function getCategorySplit(categoryId){
+  if (!categoryId) return DEFAULT_SPLIT;
+  const profile = CATEGORY_PROFILES.find(p => p.id === categoryId);
+  return profile ? profile.split : DEFAULT_SPLIT;
 }
 
 // Normalize platform names so "Meta (Facebook/Instagram)" / "Meta" / "Google Search" / "Google Ads"
@@ -983,7 +991,10 @@ function renderPanel(){
     <div class="field-grid" style="grid-template-columns:1fr">
       <div class="field">
         <label>${tr('categoryLabel')}</label>
-        <input type="text" id="f_categoryInput" value="${escapeHtml(cat.categoryInput || '')}" placeholder="${tr('categoryPlaceholder')}" />
+        <select id="f_categoryInput">
+          <option value="">${tr('categoryPlaceholder')}</option>
+          ${CATEGORY_PROFILES.map(p => `<option value="${p.id}" ${cat.categoryInput === p.id ? 'selected' : ''}>${p.name[LANG] || p.name.en}</option>`).join('')}
+        </select>
       </div>
     </div>
 
@@ -994,8 +1005,7 @@ function renderPanel(){
         ${categorySplit.map(([name,pct]) => `
           <div class="split-row">
             <span class="sp-name">${name}</span>
-            <span class="sp-track"><span class="sp-fill" style="width:${pct}%"></span></span>
-            <span class="sp-pct">${pct}%</span>
+            <span class="sp-track"><span class="sp-fill" style="width:${pct}%"><span class="sp-pct-inline">${pct}%</span></span></span>
           </div>
         `).join('')}
       </div>
@@ -1030,9 +1040,7 @@ function renderPanel(){
 
     <div class="divider"></div>
 
-    <div class="section-label">${tr('objectiveLabel')}: ${OBJECTIVES.sales[LANG] || OBJECTIVES.sales.en}</div>
-
-    <div class="section-label" style="margin-top:18px">${tr('platformTargetsTitle')}</div>
+    <div class="section-label">${tr('platformTargetsTitle')}</div>
     <div class="ptarget-list" id="ptargetList">
       ${categorySplit.map(([name, pct]) => {
         const platBudget = (Number(cat.budget)||0) * (pct/100);
@@ -1062,15 +1070,14 @@ function renderPanel(){
         ${categorySplit.map(([name, pct]) => {
           const platBudget = (Number(cat.budget)||0) * (pct/100);
           const usdRate = USD_APPROX_RATE[cur] || 1;
-          const [lowCpa, highCpa] = estimatePlatformCpaRange(name, cat.country, cat.categoryInput, cur, usdRate);
-          const lowOrders = highCpa > 0 ? Math.round(platBudget / highCpa) : 0;
-          const highOrders = lowCpa > 0 ? Math.round(platBudget / lowCpa) : 0;
+          const cpa = estimatePlatformCpa(name, cat.country, cat.categoryInput, cur, usdRate);
+          const estOrders = cpa.avg > 0 ? Math.round(platBudget / cpa.avg) : 0;
           return `
           <div class="analysis-row">
             <span class="ar-name">${name}</span>
-            <span class="ar-range">${tr('analysisCpaRange')}: <b>${fmt(lowCpa, cur)} – ${fmt(highCpa, cur)}</b></span>
+            <span class="ar-range">${tr('analysisCpaRange')}: <b>${fmt(cpa.avg, cur)}</b> <span class="ar-band">(${fmt(cpa.low, cur)}–${fmt(cpa.high, cur)})</span></span>
             <span class="ar-orders">
-              <div class="ao-num">${lowOrders.toLocaleString()}–${highOrders.toLocaleString()}</div>
+              <div class="ao-num">${estOrders.toLocaleString()}</div>
               <div class="ao-label">${tr('analysisEstOrders')}</div>
             </span>
           </div>`;
@@ -1237,7 +1244,7 @@ function renderPanel(){
 
   const catInputEl = document.getElementById('f_categoryInput');
   if (catInputEl){
-    catInputEl.addEventListener('input', (e) => {
+    catInputEl.addEventListener('change', (e) => {
       cat.categoryInput = e.target.value;
       refreshCategoryDependentSections(cat);
     });
@@ -1285,8 +1292,7 @@ function refreshCategoryDependentSections(cat){
     splitBarsEl.innerHTML = categorySplit.map(([name,pct]) => `
       <div class="split-row">
         <span class="sp-name">${name}</span>
-        <span class="sp-track"><span class="sp-fill" style="width:${pct}%"></span></span>
-        <span class="sp-pct">${pct}%</span>
+        <span class="sp-track"><span class="sp-fill" style="width:${pct}%"><span class="sp-pct-inline">${pct}%</span></span></span>
       </div>
     `).join('');
   }
@@ -1331,15 +1337,14 @@ function refreshCategoryDependentSections(cat){
     analysisRowsEl.innerHTML = categorySplit.map(([name, pct]) => {
       const platBudget = (Number(cat.budget)||0) * (pct/100);
       const usdRate = USD_APPROX_RATE[cur] || 1;
-      const [lowCpa, highCpa] = estimatePlatformCpaRange(name, cat.country, cat.categoryInput, cur, usdRate);
-      const lowOrders = highCpa > 0 ? Math.round(platBudget / highCpa) : 0;
-      const highOrders = lowCpa > 0 ? Math.round(platBudget / lowCpa) : 0;
+      const cpa = estimatePlatformCpa(name, cat.country, cat.categoryInput, cur, usdRate);
+      const estOrders = cpa.avg > 0 ? Math.round(platBudget / cpa.avg) : 0;
       return `
       <div class="analysis-row">
         <span class="ar-name">${name}</span>
-        <span class="ar-range">${tr('analysisCpaRange')}: <b>${fmt(lowCpa, cur)} – ${fmt(highCpa, cur)}</b></span>
+        <span class="ar-range">${tr('analysisCpaRange')}: <b>${fmt(cpa.avg, cur)}</b> <span class="ar-band">(${fmt(cpa.low, cur)}–${fmt(cpa.high, cur)})</span></span>
         <span class="ar-orders">
-          <div class="ao-num">${lowOrders.toLocaleString()}–${highOrders.toLocaleString()}</div>
+          <div class="ao-num">${estOrders.toLocaleString()}</div>
           <div class="ao-label">${tr('analysisEstOrders')}</div>
         </span>
       </div>`;
